@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    username: bleaf
+    password: bleaf!@#
+    url: jdbc:postgresql://bkleaf.asuscomm.com:7654/bleaf
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
