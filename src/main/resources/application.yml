@@ -1,3 +1,9 @@
+bleaf:
+  comix:
+    url:
+      marumaru_daily_url: "http://marumaru.in/c/26"
+      marumaru_title_url: "http://marumaru.in/c/1"
+
 spring:
   datasource:
     username: bleaf

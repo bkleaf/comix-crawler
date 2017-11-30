@@ -1,4 +1,4 @@
-package com.bleaf.comix.crawler.util;
+package com.bleaf.comix.crawler.configuration;
 
 import java.util.Random;
 

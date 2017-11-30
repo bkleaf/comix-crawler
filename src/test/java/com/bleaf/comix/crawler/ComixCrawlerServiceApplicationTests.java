@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ComixCrawlerApplicationTests {
+public class ComixCrawlerServiceApplicationTests {
 
 	@Test
 	public void contextLoads() {

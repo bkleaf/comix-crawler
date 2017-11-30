@@ -1,7 +1,6 @@
 package com.bleaf.comix.crawler.service;
 
-import com.bleaf.comix.crawler.util.UserAgent;
-import com.google.common.collect.Maps;
+import com.bleaf.comix.crawler.configuration.UserAgent;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -13,11 +12,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
-public class ComixCrawler {
+public class ComixCrawlerService {
     private final static String ROOT_URL = "http://marumaru.in";
 
     public void crawlling(String url) throws IOException {
@@ -29,6 +27,10 @@ public class ComixCrawler {
 
         for(Element article : articles) {
 
+            // "abs: => url의 절대 값을 가지고 올 때 사용하는 키워드"
+            // href="/c/26"일경우,
+            // .attr("href") = /c/26
+            // .attr("abs:href") = http://www.marumaru.in/c/26"
             String href = article.attr("abs:href"); // a태그 href의 절대주소를 얻어낸다.
 
             // a 태그 안에 포함된 div들
@@ -93,46 +95,5 @@ public class ComixCrawler {
         }
 
         System.out.println(imageUrls); // 이미지 URL들.
-    }
-
-    public Map<String, String> getCookies(String url, String referer) throws IOException {
-        String password = "qndxkr";
-
-        Connection.Response loginPageResponse = Jsoup.connect(url)
-                .timeout(3000)
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.3")
-                .header("Referer", referer)
-                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .header("Accept-Encoding", "gzip, deflate")
-                .header("Accept-Language", "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7")
-                .header("Cache-Control", "max-age=0")
-                .method(Connection.Method.GET)
-                .execute();
-
-        Map<String, String> loginTryCookie = loginPageResponse.cookies();
-
-        Map<String, String> data = Maps.newHashMap();
-        data.put("pass", password);
-//        data.put("")
-
-
-        Connection.Response response = Jsoup.connect(url)
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.3")
-                .timeout(3000)
-                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .header("Accept-Encoding", "gzip, deflate")
-                .header("Accept-Language", "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7")
-                .header("Cache-Control", "max-age=0")
-                .header("Referer", referer)
-                .cookies(loginTryCookie)
-                .data(data)
-                .method(Connection.Method.POST)
-                .execute();
-
-        Map<String, String> loginCookie = response.cookies();
-
-        return loginCookie;
     }
 }
