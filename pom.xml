@@ -51,6 +51,11 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.11.2</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.htmlunit</groupId>
+			<artifactId>htmlunit</artifactId>
+			<version>2.28</version>
+		</dependency>
 
 		<!-- utility -->
 		<dependency>

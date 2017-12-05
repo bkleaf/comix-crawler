@@ -57,10 +57,10 @@ public class ComixCrawlerService {
 
     public void open2(String url) throws IOException {
         Document rawData = Jsoup.connect(url)
+                .userAgent(UserAgent.getUserAgent())
+                .header("charset", "utf-8")
                 .timeout(5000)
                 .get();
-
-
 
         Elements contentATags = rawData.select("#vContent a"); // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
 
