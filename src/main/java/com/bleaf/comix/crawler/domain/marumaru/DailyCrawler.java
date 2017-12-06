@@ -71,15 +71,14 @@ public class DailyCrawler implements ComixCrawler {
 //        }
 //    }
 
-    private List<Comix> getDateList(DateTime date) {
-        return null;
-    }
-
-    public void crawlling(String url) throws IOException {
-        String pageSource = pageUtil.getListHtmlPage(url);
+    private List<Comix> getDailyList(DateTime selectDate) {
+        String pageSource = pageUtil.getListHtmlPage(comixUrlConfig.getMarumaruDailyUrl());
 
         Document rawData = Jsoup.parse(pageSource);
-        Elements articles = rawData.select("tr:not(.tr_notice) a"); // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
+
+        // 일일 업데이트 게시판은 tabe tag를 이용하여 구성되어 있음.
+        // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
+        Elements articles = rawData.select("tr:not(.tr_notice) a");
 
         for(Element article : articles) {
 
