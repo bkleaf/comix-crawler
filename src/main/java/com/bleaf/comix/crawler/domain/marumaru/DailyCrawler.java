@@ -1,30 +1,35 @@
 package com.bleaf.comix.crawler.domain.marumaru;
 
-import com.bleaf.comix.crawler.configuration.ComixUrlConfig;
+import com.bleaf.comix.crawler.configuration.MarumaruConfig;
 import com.bleaf.comix.crawler.configuration.UserAgent;
 import com.bleaf.comix.crawler.domain.ComixCrawler;
 import com.bleaf.comix.crawler.domain.dto.Comix;
-import com.bleaf.comix.crawler.domain.utility.PageUtil;
+import com.bleaf.comix.crawler.domain.utility.ComixUtil;
+import com.bleaf.comix.crawler.domain.utility.StoreType;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@Service
 public class DailyCrawler implements ComixCrawler {
     @Autowired
-    ComixUrlConfig comixUrlConfig;
+    MarumaruConfig marumaruConfig;
 
     @Autowired
-    PageUtil pageUtil;
+    ComixUtil comixUtil;
 
     @Override
     public List<String> getComixLIst() {
@@ -71,35 +76,64 @@ public class DailyCrawler implements ComixCrawler {
 //        }
 //    }
 
-    private List<Comix> getDailyList(DateTime selectDate) {
-        String pageSource = pageUtil.getListHtmlPage(comixUrlConfig.getMarumaruDailyUrl());
+    public List<Comix> getDailyList(DateTime selectDate) throws IOException {
+        String pageSource = comixUtil.getListHtmlPage(
+                marumaruConfig.getDailyUri(),
+                StoreType.MARUMARU);
 
-        Document rawData = Jsoup.parse(pageSource);
+        // String pageSource에서 Jsoup doc으로 변경할 경우, base uri가 없으면
+        // abs:href 에서 empty가 return 된다.
+        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
 
         // 일일 업데이트 게시판은 tabe tag를 이용하여 구성되어 있음.
         // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
         Elements articles = rawData.select("tr:not(.tr_notice) a");
 
+        List<Comix> comixes = Lists.newArrayList();
+        Comix comix;
         for(Element article : articles) {
 
             // "abs: => url의 절대 값을 가지고 올 때 사용하는 키워드"
             // href="/c/26"일경우,
             // .attr("href") = /c/26
             // .attr("abs:href") = http://www.marumaru.in/c/26"
-            String href = article.attr("abs:href"); // a태그 href의 절대주소를 얻어낸다.
+            String href = article.attr("abs:href");
 
             // a 태그 안에 포함된 div들
             Elements articleDiv = article.select("div");
 
-            String title = articleDiv.get(1).ownText(); // 두 번째 div에서 제목을 얻어낸다.
-            String date = articleDiv.get(1).select("small").text()
-                    .split("\\|")[0];
+            // 두 번째 div에서 제목을 얻어낸다.
+            String title = articleDiv.get(1).ownText();
+            String date = articleDiv
+                    .get(1)
+                    .select("small")
+                    .text()
+                    .split("\\|")[0]
+                    .trim()
+                    .split(" ")[0];
 
             log.info("title = {} : {}", title, date);
             log.info("comix url = {}", href);
 
-            this.open2(href);
+            DateTime dateTime = DateTimeFormat
+                    .forPattern(marumaruConfig.getDateFormat())
+                    .parseDateTime(date);
+
+
+
+            comix = new Comix();
+            comix.setTitle(title);
+            comix.setUpdateDate(dateTime);
+            comix.setShortComix(comixUtil.isShort(title));
+            comix.setComixUri(href);
+            comix.setVolumn(comixUtil.getVolumn(title));
+
+            log.debug("comix info = {}", comix);
+
+            comixes.add(comix);
         }
+
+        return null;
     }
 
     public void open2(String url) throws IOException {

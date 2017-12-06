@@ -15,6 +15,12 @@ import java.nio.file.Path;
 public class Comix {
     String title;
     DateTime updateDate;
-    Path allList;
-    Path oneList;
+    boolean shortComix;
+    // 전편 보기와, 한회 보기가 있는 page url;
+    String comixUri;
+    // 전편 page url;
+    String allSeriesUri;
+    // 한 회의 만화가 있는 page url;
+    String oneVolumnUri;
+    String volumn;
 }
