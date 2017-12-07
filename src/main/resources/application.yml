@@ -1,8 +1,11 @@
 bleaf:
   comix:
-    url:
-      marumaru_daily_url: "http://marumaru.in/c/26"
-      marumaru_title_url: "http://marumaru.in/c/1"
+    marumaru:
+      base_uri: "http://marumaru.in"
+      daily_uri: "http://marumaru.in/c/26"
+      title_uri: "http://marumaru.in/c/1"
+      password: "qndxkr"
+      date_format: "yyyy.MM.dd"
 
 spring:
   datasource:
@@ -16,3 +19,19 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+spring:
+  profiles:
+    active: test
+
+---
+
+spring:
+  profile: test
+
+bleaf:
+  comix:
+    crawler:
+      base_path: "D:\Comix\daily"
+
+
