@@ -26,5 +26,5 @@ public class Comix {
     // 한 회의 만화가 있는 page url;
     String oneVolumnUri;
     // 만화 img uri
-    List<String> imageUrls;
+    List<String> imageUris;
 }

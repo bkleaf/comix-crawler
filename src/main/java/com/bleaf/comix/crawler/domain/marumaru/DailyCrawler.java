@@ -7,6 +7,7 @@ import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.bleaf.comix.crawler.domain.utility.StoreType;
 import com.google.common.collect.Lists;
+import com.google.common.net.UrlEscapers;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -51,39 +52,17 @@ public class DailyCrawler implements ComixCrawler {
         return null;
     }
 
-//    public class DownloadImage {
-//        public static void main(String[] args) {
 //
-//            String imageUrl = "http://via.placeholder.com/350x150";
-//            String destinationFilePath = "/path/to/file/test.jpg"; // For windows something like c:\\path\to\file\test.jpg
-//
-//            InputStream inputStream = null;
-//            try {
-//                inputStream = new URL(imageUrl).openStream();
-//                Files.copy(inputStream, Paths.get(destinationFilePath));
-//            } catch (IOException e) {
-//                System.out.println("Exception Occurred " + e);
-//            } finally {
-//                if (inputStream != null) {
-//                    try {
-//                        inputStream.close();
-//                    } catch (IOException e) {
-//                        // Ignore
-//                    }
-//                }
-//            }
-//
-//        }
-//    }
 
     public List<Comix> getDailyList(DateTime selectDate) throws IOException {
-        String pageSource = comixUtil.getListHtmlPage(
+        Document rawData = comixUtil.getHtmlPageJsoup(
                 marumaruConfig.getDailyUri(),
                 StoreType.MARUMARU);
 
         // String pageSource에서 Jsoup doc으로 변경할 경우, base uri가 없으면
         // abs:href 에서 empty가 return 된다.
-        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
+
+//        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
 
         // 일일 업데이트 게시판은 tabe tag를 이용하여 구성되어 있음.
         // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
@@ -122,7 +101,7 @@ public class DailyCrawler implements ComixCrawler {
             String volumnUri = getVolumnUri(href);
             String allSeriesUri = getAllSeriesUri(href);
 
-            List<String> comixPage = getComixPage(href);
+            List<String> comixPage = getComixPage(volumnUri);
 
 
             comix = new Comix();
@@ -133,7 +112,7 @@ public class DailyCrawler implements ComixCrawler {
             comix.setComixUri(href);
             comix.setOneVolumnUri(volumnUri);
             comix.setAllSeriesUri(allSeriesUri);
-            comix.setImageUrls(comixPage);
+            comix.setImageUris(comixPage);
 
             comix.setVolumn(comixUtil.getVolumn(title));
 
@@ -147,9 +126,9 @@ public class DailyCrawler implements ComixCrawler {
 
     // 업데이트 된 화에 해당하는 uri를 돌려 준다
     public String getVolumnUri(String uri) throws IOException {
-        String pageSource = comixUtil.getListHtmlPage(uri, StoreType.MARUMARU);
+        Document rawData = comixUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
 
-        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
+//        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
 
         Elements contentATags = rawData.select("#vContent a"); // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
 
@@ -164,9 +143,9 @@ public class DailyCrawler implements ComixCrawler {
 
     // 업데이트 된 화에 해당하는 uri를 돌려 준다
     public String getAllSeriesUri(String uri) throws IOException {
-        String pageSource = comixUtil.getListHtmlPage(uri, StoreType.MARUMARU);
+        Document rawData = comixUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
 
-        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
+//        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
 
         Elements contentATags = rawData.select("#vContent a"); // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
 
@@ -180,17 +159,22 @@ public class DailyCrawler implements ComixCrawler {
     }
 
     public List<String> getComixPage(String uri) throws IOException {
-        String pageSource = comixUtil.getListHtmlPage(uri, StoreType.MARUMARU);
+        Document rawData = comixUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
 
-        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
+//        Document rawData = Jsoup.parse(pageSource, );
 
         // lz-lazyload 클래스를 가진 img들
         Elements imgs = rawData.select("img[class=lz-lazyload]");
 
         List<String> imageUrls = new ArrayList<>();
 
+        String imgUrl;
         for(Element img : imgs) {
-            imageUrls.add(img.attr("abs:data-src"));
+            imgUrl = UrlEscapers.urlFragmentEscaper().escape(img.attr("abs:data-src"));
+
+            log.debug("convert image url = {}", imgUrl);
+
+            imageUrls.add(imgUrl);
         }
 
         return imageUrls;

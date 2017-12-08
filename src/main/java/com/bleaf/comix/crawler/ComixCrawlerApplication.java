@@ -1,9 +1,12 @@
 package com.bleaf.comix.crawler;
 
+import com.bleaf.comix.crawler.configuration.UserAgent;
+import com.bleaf.comix.crawler.domain.application.Downloader;
 import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.marumaru.DailyCrawler;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.bleaf.comix.crawler.service.ComixCrawlerService;
+import com.google.common.net.UrlEscapers;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,14 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.DateTimeException;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +39,9 @@ public class ComixCrawlerApplication implements CommandLineRunner {
 	@Autowired
 	DailyCrawler dailyCrawler;
 
+	@Autowired
+	Downloader downloader;
+
 	public static void main(String[] args) {
 		SpringApplication.run(ComixCrawlerApplication.class, args);
 	}
@@ -35,6 +49,8 @@ public class ComixCrawlerApplication implements CommandLineRunner {
 	@Override
 	public void run(String... strings) throws Exception {
 		List<Comix> list = dailyCrawler.getDailyList(new DateTime(new Date()));
+
+		downloader.download(list);
 
 		log.info("ist = {}", list.size());
 //		comixCrawlerService.crawlling("http://marumaru.in/c/26");

@@ -6,17 +6,19 @@ bleaf:
       title_uri: "http://marumaru.in/c/1"
       password: "qndxkr"
       date_format: "yyyy.MM.dd"
+    crawler:
+      base_path: "/Users/bleaf/Documents/comix"
 
 
-#spring:
-#  datasource:
-#    username: bleaf
-#    password: bleaf!@#
-#    url: jdbc:postgresql://bkleaf.asuscomm.com:7654/bleaf
-#    driver-class-name: org.postgresql.Driver
-#  jpa:
-#    hibernate:
-#      ddl-auto: create
-#    properties:
-#      hibernate:
-#        format_sql: true
+spring:
+  datasource:
+    username: bleaf
+    password: bleaf!@#
+    url: jdbc:postgresql://bkleaf.asuscomm.com:7654/bleaf
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true

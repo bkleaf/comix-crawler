@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-//@ConfigurationProperties("bleaf.comix.crawler")
+@ConfigurationProperties("bleaf.comix.crawler")
 public class ComixConfig {
     String basePath;
 }
