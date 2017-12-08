@@ -7,31 +7,16 @@ bleaf:
       password: "qndxkr"
       date_format: "yyyy.MM.dd"
 
-spring:
-  datasource:
-    username: bleaf
-    password: bleaf!@#
-    url: jdbc:postgresql://bkleaf.asuscomm.com:7654/bleaf
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: create
-    properties:
-      hibernate:
-        format_sql: true
 
-spring:
-  profiles:
-    active: test
-
----
-
-spring:
-  profile: test
-
-bleaf:
-  comix:
-    crawler:
-      base_path: "D:\Comix\daily"
-
-
+#spring:
+#  datasource:
+#    username: bleaf
+#    password: bleaf!@#
+#    url: jdbc:postgresql://bkleaf.asuscomm.com:7654/bleaf
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: create
+#    properties:
+#      hibernate:
+#        format_sql: true

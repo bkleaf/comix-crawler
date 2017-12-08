@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 
 import java.nio.file.Path;
+import java.util.List;
 
 @Slf4j
 @Data
@@ -16,11 +17,14 @@ public class Comix {
     String title;
     DateTime updateDate;
     boolean shortComix;
+    String volumn;
+
     // 전편 보기와, 한회 보기가 있는 page url;
     String comixUri;
     // 전편 page url;
     String allSeriesUri;
     // 한 회의 만화가 있는 page url;
     String oneVolumnUri;
-    String volumn;
+    // 만화 img uri
+    List<String> imageUrls;
 }
