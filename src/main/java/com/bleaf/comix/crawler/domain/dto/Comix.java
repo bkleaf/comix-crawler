@@ -14,11 +14,20 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Comix {
+    // comic name
+    // ex) 원피스
+    String name;
+
+    // 다운로드 받는 페이지의 title
+    // ex) 원피스 141화
     String title;
     DateTime updateDate;
     boolean shortComix;
     String volumn;
     List<String> exts;
+
+    Path homePath;
+    Path comixPath;
 
     // 전편 보기와, 한회 보기가 있는 page url;
     String comixUri;

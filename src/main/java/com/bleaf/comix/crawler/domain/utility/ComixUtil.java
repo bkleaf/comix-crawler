@@ -14,8 +14,6 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.format.DateTimeFormatter;
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,32 +61,32 @@ public class ComixUtil {
         return page;
     }
 
-    public String getListHtmlPage(String listUrl, StoreType storeType) {
-        Document document= getHtmlPageJsoup(listUrl, storeType);
-
-        String pageSource = document.toString();
-        if(pageSource == null) {
-            pageSource = getHtmlPageHtmlUnit(listUrl, storeType);
-        }
-
-        return pageSource;
-    }
-
-    public boolean makeDateDirectory(String date) throws IOException {
+    public boolean makeDownloadDirectory(String directoryName) throws IOException {
         Path basePath = Paths.get(comixConfig.getBasePath());
+        Path servicePath = Paths.get(comixConfig.getServicePath());
 
         if(!Files.exists(basePath))
-            throw new RuntimeException("comix 기본 디렉토리가 없습니다 = " + basePath.toAbsolutePath());
+            throw new RuntimeException("comix 다운로드 기본 디렉토리가 없습니다 = " + basePath.toAbsolutePath());
 
-        Path datePath = Paths.get(comixConfig.getBasePath() + File.separator + date);
+        if(!Files.exists(servicePath))
+            throw new RuntimeException("comix 서비스 기본 디렉토리가 없습니다 = " + servicePath.toAbsolutePath());
 
-        if(!Files.exists(datePath)) {
-            Files.createDirectory(datePath);
+        Path downloadDatePath = servicePath.resolve(directoryName);
+        Path serviceDatePath = servicePath.resolve(directoryName);
+
+        if(!Files.exists(downloadDatePath)) {
+            Files.createDirectory(downloadDatePath);
         } else {
-            log.info("날짜 디렉토리가 이미 존재 합니다 = {}", date);
+            log.info("다운로드 디렉토리가 이미 존재 합니다 = {}", directoryName);
         }
 
-        return Files.exists(datePath);
+        if(!Files.exists(serviceDatePath)) {
+            Files.createDirectory(downloadDatePath);
+        } else {
+            log.info("서비스 디렉토리가 이미 존재 합니다 = {}", directoryName);
+        }
+
+        return (Files.exists(downloadDatePath) && Files.exists(serviceDatePath));
     }
 
     public Path makeComixDirectory(Comix comix) throws IOException {
@@ -98,7 +96,7 @@ public class ComixUtil {
         Path basePath = Paths.get(comixConfig.getBasePath() + File.separator + date);
 
         if(!Files.exists(basePath)) {
-            if(!this.makeDateDirectory(date)) {
+            if(!this.makeDownloadDirectory(date)) {
                 throw new RuntimeException("날짜 디렉토리 생성에 실패했습니다 = " + date);
             }
         }

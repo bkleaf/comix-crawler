@@ -18,7 +18,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,15 +35,9 @@ public class Downloader {
     public void download(List<Comix> comixList) {
         log.info("start download comix list = {}", comixList.size());
 
-        String date = new DateTime(new Date()).toString("yyyyMMdd");
 
-        try {
-            comixUtil.makeDateDirectory(date);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        for(Comix comix : comixList) {
+        for (Comix comix : comixList) {
             try {
                 this.download(comix);
             } catch (Exception e) {
@@ -62,7 +55,7 @@ public class Downloader {
 
 
         Path comixPath = comixUtil.makeComixDirectory(comix);
-        if(comixPath == null || !Files.exists(comixPath)) {
+        if (comixPath == null || !Files.exists(comixPath)) {
             log.error("fail comix download = {}", comix);
             throw new RuntimeException("comix 디렉토리 생성을 못해 다운로드에 실패했습니다 = " + comix.getTitle());
         }
@@ -77,13 +70,13 @@ public class Downloader {
         Stopwatch sw = null;
 
         HttpURLConnection httpURLConnection = null;
-        for(String imgUrl : imageUrls) {
+        for (String imgUrl : imageUrls) {
             sw = Stopwatch.createStarted();
             ext = com.google.common.io.Files.getFileExtension(imgUrl);
 
             log.debug("get ext = {}", sw.elapsed(TimeUnit.MILLISECONDS));
 
-            if(Strings.isNullOrEmpty(ext)) {
+            if (Strings.isNullOrEmpty(ext)) {
                 ext = "jpg";
             }
 
@@ -103,7 +96,7 @@ public class Downloader {
             httpURLConnection.setRequestProperty("User-Agent", UserAgent.getUserAgent());
             httpURLConnection.setRequestProperty("Accept-Encoding", "gzip");
 
-            try(InputStream inputStream = httpURLConnection.getInputStream()) {
+            try (InputStream inputStream = httpURLConnection.getInputStream()) {
                 log.debug("get input stream = {}", sw.elapsed(TimeUnit.MILLISECONDS));
 
                 sw = Stopwatch.createStarted();

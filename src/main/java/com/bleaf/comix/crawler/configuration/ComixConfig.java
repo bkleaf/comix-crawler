@@ -9,4 +9,5 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("bleaf.comix.crawler")
 public class ComixConfig {
     String basePath;
+    String servicePath;
 }

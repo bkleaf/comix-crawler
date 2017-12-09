@@ -8,6 +8,7 @@ bleaf:
       date_format: "yyyy.MM.dd"
     crawler:
       base_path: "/Users/bleaf/Documents/comix"
+      service_path: "/Users/bleaf/Documents/comix/service"
 
 spring:
   datasource:
@@ -22,7 +23,7 @@ spring:
       hibernate:
         format_sql: true
   profiles:
-    active: win
+    active: mac
 
 ---
 
@@ -32,7 +33,8 @@ spring:
 bleaf:
   comix:
     crawler:
-      base-path: "D:\\Comix\\daily"
+      base_path: "D:\\Comix\\daily"
+      service_path: "D:\\Comix\\root"
 
 ---
 
@@ -42,4 +44,5 @@ spring:
 bleaf:
   comix:
     crawler:
-      base-path: "/Users/bleaf/Documents/comix"
+      base_path: "/Users/bleaf/Documents/comix"
+      service_path: "/Users/bleaf/Documents/comix/service"

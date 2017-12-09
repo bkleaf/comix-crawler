@@ -39,6 +39,9 @@ public class Compressor {
         for(Comix comix : comixList) {
 
             comixPath = basePath.resolve(comix.getTitle());
+
+            if(!Files.exists(comixPath)) continue;
+
             zipPath = basePath.resolve(comix.getTitle() + ".zip");
 
             comixPageFilter.setExts(comix.getExts());
@@ -58,6 +61,8 @@ public class Compressor {
 
                 zipArchiveOutputStream.finish();
                 zipArchiveOutputStream.flush();
+
+                log.debug(" ### compress zip = {}", zipPath.toString());
 
             } catch (IOException e) {
                 e.printStackTrace();
