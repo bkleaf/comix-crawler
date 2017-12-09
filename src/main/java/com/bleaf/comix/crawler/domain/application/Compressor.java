@@ -26,9 +26,8 @@ public class Compressor {
     ComixConfig comixConfig;
 
     public void zip(List<Comix> comixList, DateTime date) {
-
         String strDt = date.toString("yyyyMMdd");
-        Path basePath = Paths.get(comixConfig.getBasePath(), strDt);
+        Path servicePath;
 
         Path zipPath, comixPath;
 
@@ -38,11 +37,12 @@ public class Compressor {
         File pageFile;
         for(Comix comix : comixList) {
 
-            comixPath = basePath.resolve(comix.getTitle());
+            comixPath = comix.getDownloadPath();
 
             if(!Files.exists(comixPath)) continue;
 
-            zipPath = basePath.resolve(comix.getTitle() + ".zip");
+            servicePath = comix.getServicePath();
+            zipPath = Paths.get(servicePath.toString() + ".zip");
 
             comixPageFilter.setExts(comix.getExts());
 

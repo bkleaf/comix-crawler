@@ -26,8 +26,9 @@ public class Comix {
     String volumn;
     List<String> exts;
 
-    Path homePath;
-    Path comixPath;
+//    Path homePath;
+    Path downloadPath;
+    Path servicePath;
 
     // 전편 보기와, 한회 보기가 있는 page url;
     String comixUri;

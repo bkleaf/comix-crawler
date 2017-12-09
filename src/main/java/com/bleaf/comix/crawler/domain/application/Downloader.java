@@ -7,8 +7,8 @@ import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,18 +31,38 @@ public class Downloader {
     @Autowired
     ComixUtil comixUtil;
 
-    public void download(List<Comix> comixList) {
-        log.info("start download comix list = {}", comixList.size());
+    public int download(List<Comix> comixList) {
+        log.info(" ### start download comix list = {}", comixList.size());
 
-
-
+        int count=0;
+        List<Comix> retryList = Lists.newArrayList();
         for (Comix comix : comixList) {
             try {
                 this.download(comix);
+                count += 1;
+            } catch (Exception e) {
+                log.error("### error = {}", e.getMessage());
+
+                retryList.add(comix);
+            }
+        }
+
+        if(retryList.size() == 0) {
+            return count;
+        }
+
+        log.info(" ### 다운로드 실패한 항목에 대해 재시도를 합니다. = {}", retryList.size());
+
+        for(Comix comix : retryList) {
+            try {
+                this.download(comix);
+                count += 1;
             } catch (Exception e) {
                 log.error("### error = {}", e.getMessage());
             }
         }
+
+        return count;
     }
 
     public void download(Comix comix) throws IOException {
@@ -53,11 +72,10 @@ public class Downloader {
         Preconditions.checkArgument((comix.getImageUris() != null && !comix.getImageUris().isEmpty())
                 , "image url list is null");
 
-
-        Path comixPath = comixUtil.makeComixDirectory(comix);
-        if (comixPath == null || !Files.exists(comixPath)) {
+        if(!comixUtil.makeComixDirectory(comix)) {
             log.error("fail comix download = {}", comix);
-            throw new RuntimeException("comix 디렉토리 생성을 못해 다운로드에 실패했습니다 = " + comix.getTitle());
+            throw new RuntimeException(
+                    "comix 디렉토리 생성을 못해 다운로드에 실패했습니다 = " + comix.getTitle());
         }
 
         List<String> imageUrls = comix.getImageUris();
@@ -81,7 +99,7 @@ public class Downloader {
             }
 
             sw = Stopwatch.createStarted();
-            imagePath = comixPath.resolve(String.format("%03d", page) + "." + ext);
+            imagePath = comix.getDownloadPath().resolve("b_comix_" + String.format("%03d", page) + "." + ext);
 
             log.debug("get imagePath = {}", sw.elapsed(TimeUnit.MILLISECONDS));
 
@@ -111,28 +129,4 @@ public class Downloader {
 
         log.info("comix 다운 로드 성공 = {} : {}", comix.getTitle(), page);
     }
-
-
-//    public static void main(String[] args) {
-//
-//        String imageUrl = "http://via.placeholder.com/350x150";
-//        String destinationFilePath = "/path/to/file/test.jpg"; // For windows something like c:\\path\to\file\test.jpg
-//
-//        InputStream inputStream = null;
-//        try {
-//            inputStream = new URL(imageUrl).openStream();
-//            Files.copy(inputStream, Paths.get(destinationFilePath));
-//        } catch (IOException e) {
-//            System.out.println("Exception Occurred " + e);
-//        } finally {
-//            if (inputStream != null) {
-//                try {
-//                    inputStream.close();
-//                } catch (IOException e) {
-//                    // Ignore
-//                }
-//            }
-//        }
-//
-//    }
 }

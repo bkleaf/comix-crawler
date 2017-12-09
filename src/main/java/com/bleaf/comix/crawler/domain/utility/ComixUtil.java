@@ -9,6 +9,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -20,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -36,6 +36,33 @@ public class ComixUtil {
 
     @Autowired
     MarumaruConfig marumaruConfig;
+
+    public String getComixName(String title) {
+        if (!title.endsWith("화")) return title;
+
+        List<String> titles = Splitter.on(" ")
+                .omitEmptyStrings()
+                .trimResults()
+                .splitToList(title);
+
+        String lastChar = titles.get((titles.size() - 1));
+        String page = lastChar.replaceAll("[a-z|A-Z|ㄱ-ㅎ|가-힣]", "");
+
+        if (Strings.isNullOrEmpty(page)) {
+            return title;
+        }
+
+        String name = "";
+        String whiteSpace = "";
+
+        int size = titles.size() - 1;
+        for(int i=0; i < size; i++) {
+            name += whiteSpace + titles.get(i);
+            whiteSpace = " ";
+        }
+
+        return name;
+    }
 
     public boolean isShort(String title) {
         Preconditions.checkNotNull(title, "title is null");
@@ -71,7 +98,7 @@ public class ComixUtil {
         if(!Files.exists(servicePath))
             throw new RuntimeException("comix 서비스 기본 디렉토리가 없습니다 = " + servicePath.toAbsolutePath());
 
-        Path downloadDatePath = servicePath.resolve(directoryName);
+        Path downloadDatePath = basePath.resolve(directoryName);
         Path serviceDatePath = servicePath.resolve(directoryName);
 
         if(!Files.exists(downloadDatePath)) {
@@ -81,7 +108,7 @@ public class ComixUtil {
         }
 
         if(!Files.exists(serviceDatePath)) {
-            Files.createDirectory(downloadDatePath);
+            Files.createDirectory(serviceDatePath);
         } else {
             log.info("서비스 디렉토리가 이미 존재 합니다 = {}", directoryName);
         }
@@ -89,35 +116,23 @@ public class ComixUtil {
         return (Files.exists(downloadDatePath) && Files.exists(serviceDatePath));
     }
 
-    public Path makeComixDirectory(Comix comix) throws IOException {
-        String title = comix.getTitle();
-        String date = comix.getUpdateDate().toString("yyyyMMdd");
-
-        Path basePath = Paths.get(comixConfig.getBasePath() + File.separator + date);
-
-        if(!Files.exists(basePath)) {
-            if(!this.makeDownloadDirectory(date)) {
-                throw new RuntimeException("날짜 디렉토리 생성에 실패했습니다 = " + date);
-            }
-        }
-
-        Path comixPath = null;
+    public boolean makeComixDirectory(Comix comix) throws IOException {
         try {
             log.debug("comix {} 디렉토리 생성합니다", comix.getTitle());
-            comixPath = basePath.resolve(comix.getTitle());
+            Path comixPath = comix.getDownloadPath();
 
             if (Files.exists(comixPath)) {
                 log.info("해당 디렉토리가 존재 합니다");
                 FileSystemUtils.deleteRecursively(comixPath.toFile());
             }
 
-            log.debug("make comix direcotry = {}", title);
+            log.debug("make comix direcotry = {}", comix.getTitle());
             Files.createDirectory(comixPath);
         } catch (Exception e) {
             log.error("fail make directory = {}", e.getMessage());
         }
 
-        return comixPath;
+        return Files.exists(comix.getDownloadPath());
     }
 
     public List<String> getImageExtension(List<String> comixPages) {

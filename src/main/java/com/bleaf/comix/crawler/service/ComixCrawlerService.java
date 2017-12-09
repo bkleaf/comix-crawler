@@ -1,6 +1,9 @@
 package com.bleaf.comix.crawler.service;
 
 import com.bleaf.comix.crawler.configuration.UserAgent;
+import com.bleaf.comix.crawler.domain.application.Compressor;
+import com.bleaf.comix.crawler.domain.application.Downloader;
+import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.marumaru.DailyCrawler;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +33,12 @@ public class ComixCrawlerService {
     @Autowired
     DailyCrawler dailyCrawler;
 
+    @Autowired
+    Downloader downloader;
+
+    @Autowired
+    Compressor compressor;
+
 
     public void dailyCrawling() {
 
@@ -53,7 +62,18 @@ public class ComixCrawlerService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
 
-    private
+        List<Comix> comixList = dailyCrawler.getComixList(today);
+
+        if(comixList == null || comixList.isEmpty()) {
+            log.error(" ### update comix list is null or size 0 = {}", today.toString("yyyyMMdd"));
+        }
+        log.info(" ### complete update comix list = {}", comixList.size());
+
+        int count = downloader.download(comixList);
+        log.info(" ### complete download = {} : {}", comixList.size(), count);
+
+        compressor.zip(comixList, today);
+        log.info(" ### complete compress");
+    }
 }
