@@ -2,16 +2,18 @@ package com.bleaf.comix.crawler.domain.application;
 
 import com.bleaf.comix.crawler.configuration.ComixConfig;
 import com.bleaf.comix.crawler.domain.dto.Comix;
-import com.google.common.io.Files;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -23,41 +25,56 @@ public class Compressor {
     @Autowired
     ComixConfig comixConfig;
 
-    private String temp_path = "/Users/bleaf/Documents/comix/20171207/친구 게임 50화";
-    private String temp_zip = "/Users/bleaf/Documents/comix/20171207/친구 게임 50화.zip";
-    private String parent_dir="친구 게임 50화/";
+    public void zip(List<Comix> comixList, DateTime date) {
 
-    public static void main(String[] args) {
-        Compressor compressor = new Compressor();
-        compressor.compress(null);
-    }
+        String strDt = date.toString("yyyyMMdd");
+        Path basePath = Paths.get(comixConfig.getBasePath(), strDt);
 
+        Path zipPath, comixPath;
 
-    public void compress(List<Comix> comixList) {
-        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(new File(temp_zip))) {
+        ZipArchiveEntry zipArchiveEntry;
 
-            ZipArchiveEntry zipArchiveEntry;
+        ComixPageFilter comixPageFilter = new ComixPageFilter();
+        File pageFile;
+        for(Comix comix : comixList) {
 
-            Path tempPath = Paths.get(temp_path);
+            comixPath = basePath.resolve(comix.getTitle());
+            zipPath = basePath.resolve(comix.getTitle() + ".zip");
 
-            String[] files = tempPath.toFile().list();
+            comixPageFilter.setExts(comix.getExts());
 
-            File file;
-            for(String f : files) {
-                file = new File(temp_path + File.separator + f);
+            try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(zipPath.toFile());
+                 DirectoryStream<Path> directoryStream = Files.newDirectoryStream(comixPath, comixPageFilter)) {
 
-                zipArchiveEntry = new ZipArchiveEntry(file.getName());
-                zipArchiveEntry.setSize(file.length());
+                for(Path page : directoryStream) {
+                    pageFile = page.toFile();
+                    zipArchiveEntry = new ZipArchiveEntry(pageFile.getName());
+                    zipArchiveEntry.setSize(pageFile.length());
 
-                zipArchiveOutputStream.putArchiveEntry(zipArchiveEntry);
-                zipArchiveOutputStream.write(Files.toByteArray(file));
-                zipArchiveOutputStream.closeArchiveEntry();
+                    zipArchiveOutputStream.putArchiveEntry(zipArchiveEntry);
+                    zipArchiveOutputStream.write(com.google.common.io.Files.toByteArray(pageFile));
+                    zipArchiveOutputStream.closeArchiveEntry();
+                }
+
+                zipArchiveOutputStream.finish();
+                zipArchiveOutputStream.flush();
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+    }
+}
 
+@Slf4j
+@Data
+class ComixPageFilter implements DirectoryStream.Filter<Path> {
+    List<String> exts;
+
+    @Override
+    public boolean accept(Path entry) throws IOException {
+        String ext = com.google.common.io.Files.getFileExtension(entry.getFileName().toString());
+
+        return (Files.isRegularFile(entry) && exts.contains(ext));
     }
 }

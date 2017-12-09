@@ -5,6 +5,7 @@ import com.bleaf.comix.crawler.configuration.UserAgent;
 import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -20,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -34,21 +36,21 @@ public class Downloader {
     public void download(List<Comix> comixList) {
         log.info("start download comix list = {}", comixList.size());
 
-
         String date = new DateTime(new Date()).toString("yyyyMMdd");
 
         try {
             comixUtil.makeDateDirectory(date);
-
-            for(Comix comix : comixList) {
-                this.download(comix);
-            }
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (RuntimeException e) {
             e.printStackTrace();
         }
 
+        for(Comix comix : comixList) {
+            try {
+                this.download(comix);
+            } catch (Exception e) {
+                log.error("### error = {}", e.getMessage());
+            }
+        }
     }
 
     public void download(Comix comix) throws IOException {
@@ -72,17 +74,28 @@ public class Downloader {
         int page = 1;
         String ext;
 
+        Stopwatch sw = null;
+
         HttpURLConnection httpURLConnection = null;
         for(String imgUrl : imageUrls) {
+            sw = Stopwatch.createStarted();
             ext = com.google.common.io.Files.getFileExtension(imgUrl);
+
+            log.debug("get ext = {}", sw.elapsed(TimeUnit.MILLISECONDS));
 
             if(Strings.isNullOrEmpty(ext)) {
                 ext = "jpg";
             }
 
+            sw = Stopwatch.createStarted();
             imagePath = comixPath.resolve(String.format("%03d", page) + "." + ext);
+
+            log.debug("get imagePath = {}", sw.elapsed(TimeUnit.MILLISECONDS));
+
             log.debug("download image path = {} -> {}", imgUrl, imagePath);
 
+
+            sw = Stopwatch.createStarted();
             httpURLConnection = (HttpURLConnection) new URL(imgUrl).openConnection();
             httpURLConnection.setRequestMethod("GET");
             httpURLConnection.setConnectTimeout(5000);
@@ -91,7 +104,11 @@ public class Downloader {
             httpURLConnection.setRequestProperty("Accept-Encoding", "gzip");
 
             try(InputStream inputStream = httpURLConnection.getInputStream()) {
+                log.debug("get input stream = {}", sw.elapsed(TimeUnit.MILLISECONDS));
+
+                sw = Stopwatch.createStarted();
                 Files.copy(inputStream, imagePath);
+                log.debug("write image = {}", sw.elapsed(TimeUnit.MILLISECONDS));
             } catch (IOException e) {
                 e.printStackTrace();
             }

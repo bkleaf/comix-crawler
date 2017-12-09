@@ -9,7 +9,6 @@ bleaf:
     crawler:
       base_path: "/Users/bleaf/Documents/comix"
 
-
 spring:
   datasource:
     username: bleaf
@@ -22,3 +21,25 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  profiles:
+    active: win
+
+---
+
+spring:
+  profiles: win
+
+bleaf:
+  comix:
+    crawler:
+      base-path: "D:\\Comix\\daily"
+
+---
+
+spring:
+  profiles: mac
+
+bleaf:
+  comix:
+    crawler:
+      base-path: "/Users/bleaf/Documents/comix"

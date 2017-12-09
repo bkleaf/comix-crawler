@@ -82,7 +82,7 @@ public class DailyCrawler implements ComixCrawler {
             Elements articleDiv = article.select("div");
 
             // 두 번째 div에서 제목을 얻어낸다.
-            String title = articleDiv.get(1).ownText();
+            String title = comixUtil.checkTitle(articleDiv.get(1).ownText());
             String date = articleDiv
                     .get(1)
                     .select("small")
@@ -98,16 +98,20 @@ public class DailyCrawler implements ComixCrawler {
                     .forPattern(marumaruConfig.getDateFormat())
                     .parseDateTime(date);
 
+            if(!selectDate.equals(dateTime)) {
+                continue;
+            }
+
             String volumnUri = getVolumnUri(href);
             String allSeriesUri = getAllSeriesUri(href);
 
             List<String> comixPage = getComixPage(volumnUri);
 
-
             comix = new Comix();
             comix.setTitle(title);
             comix.setUpdateDate(dateTime);
             comix.setShortComix(comixUtil.isShort(title));
+            comix.setExts(comixUtil.getImageExtension(comixPage));
 
             comix.setComixUri(href);
             comix.setOneVolumnUri(volumnUri);
@@ -171,7 +175,6 @@ public class DailyCrawler implements ComixCrawler {
         String imgUrl;
         for(Element img : imgs) {
             imgUrl = UrlEscapers.urlFragmentEscaper().escape(img.attr("abs:data-src"));
-
             log.debug("convert image url = {}", imgUrl);
 
             imageUrls.add(imgUrl);

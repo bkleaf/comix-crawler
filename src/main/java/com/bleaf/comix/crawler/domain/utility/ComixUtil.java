@@ -12,6 +12,7 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.format.DateTimeFormatter;
 import org.jsoup.Connection;
@@ -19,6 +20,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -101,19 +103,43 @@ public class ComixUtil {
             }
         }
 
+        Path comixPath = null;
+        try {
+            log.debug("comix {} 디렉토리 생성합니다", comix.getTitle());
+            comixPath = basePath.resolve(comix.getTitle());
 
-        log.debug("comix {} 디렉토리 생성합니다", comix.getTitle());
-        Path comixPath = basePath.resolve(comix.getTitle());
+            if (Files.exists(comixPath)) {
+                log.info("해당 디렉토리가 존재 합니다");
+                FileSystemUtils.deleteRecursively(comixPath.toFile());
+            }
 
-        if(Files.exists(comixPath)) {
-            log.info("해당 디렉토리가 존재 합니다");
-            Files.delete(comixPath);
+            log.debug("make comix direcotry = {}", title);
+            Files.createDirectory(comixPath);
+        } catch (Exception e) {
+            log.error("fail make directory = {}", e.getMessage());
         }
 
-        log.debug("make comix direcotry = {}", title);
-        Files.createDirectory(comixPath);
-
         return comixPath;
+    }
+
+    public List<String> getImageExtension(List<String> comixPages) {
+        List<String> exts = Lists.newArrayList();
+
+        String ext;
+        for(String page : comixPages) {
+            ext = com.google.common.io.Files.getFileExtension(page);
+            log.debug("comix page file extension = {} : {}", ext, page);
+
+            if(!exts.contains(ext)) {
+                exts.add(ext);
+            }
+        }
+
+        return exts;
+    }
+
+    public String checkTitle(String title) {
+        return title.replaceAll("[\\/:*?<>|.]", " ").trim();
     }
 
     public Document getHtmlPageJsoup(String listUrl, StoreType storeType){

@@ -18,6 +18,7 @@ public class Comix {
     DateTime updateDate;
     boolean shortComix;
     String volumn;
+    List<String> exts;
 
     // 전편 보기와, 한회 보기가 있는 page url;
     String comixUri;
