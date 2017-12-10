@@ -1,5 +1,7 @@
 package com.bleaf.comix.crawler.domain.dto;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +10,8 @@ import org.joda.time.DateTime;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 @Slf4j
 @Data
@@ -23,7 +27,7 @@ public class Comix {
     String title;
     DateTime updateDate;
     boolean shortComix;
-    String volumn;
+    String episode;
     List<String> exts;
 
 //    Path homePath;
@@ -33,9 +37,9 @@ public class Comix {
     // 전편 보기와, 한회 보기가 있는 page url;
     String comixUri;
     // 전편 page url;
-    String allSeriesUri;
+    String allEpisodeUri;
     // 한 회의 만화가 있는 page url;
-    String oneVolumnUri;
+    String episodeUri;
     // 만화 img uri
     List<String> imageUris;
 }

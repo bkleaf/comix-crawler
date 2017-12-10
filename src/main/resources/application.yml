@@ -3,7 +3,7 @@ bleaf:
     marumaru:
       base_uri: "http://marumaru.in"
       daily_uri: "http://marumaru.in/c/26"
-      title_uri: "http://marumaru.in/c/1"
+      title_uri: "http://marumaru.in/?r=home&mod=search&x=0&y=0&keyword="
       password: "qndxkr"
       date_format: "yyyy.MM.dd"
     crawler:

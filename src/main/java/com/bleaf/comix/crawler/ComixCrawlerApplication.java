@@ -8,6 +8,7 @@ import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.marumaru.DailyCrawler;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.bleaf.comix.crawler.service.ComixCrawlerService;
+import com.google.common.base.CharMatcher;
 import com.google.common.net.UrlEscapers;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -69,6 +70,6 @@ public class ComixCrawlerApplication implements CommandLineRunner {
 //
 //		log.info("ist = {}", list.size());
 
-		comixCrawlerService.dailyCrawling();
+		comixCrawlerService.titleCrawling("그 여름");
 	}
 }

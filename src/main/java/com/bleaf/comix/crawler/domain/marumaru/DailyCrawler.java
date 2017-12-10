@@ -5,6 +5,7 @@ import com.bleaf.comix.crawler.configuration.MarumaruConfig;
 import com.bleaf.comix.crawler.domain.ComixCrawler;
 import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
+import com.bleaf.comix.crawler.domain.utility.HtmlParserUtil;
 import com.bleaf.comix.crawler.domain.utility.StoreType;
 import com.google.common.collect.Lists;
 import com.google.common.net.UrlEscapers;
@@ -35,6 +36,9 @@ public class DailyCrawler implements ComixCrawler {
     @Autowired
     ComixUtil comixUtil;
 
+    @Autowired
+    HtmlParserUtil htmlParserUtil;
+
     @Override
     public List<Comix> getComixList(DateTime today) {
         // String pageSource에서 Jsoup doc으로 변경할 경우, base uri가 없으면
@@ -47,7 +51,7 @@ public class DailyCrawler implements ComixCrawler {
 
         Comix comix;
 
-        String name, title, date, href, volumnUri, allSeriesUri;
+        String name, title, date, href, episodeUri, allEpisodeUri, episode;
         List<String> comixPage;
 
         DateTime dateTime = null;
@@ -59,7 +63,7 @@ public class DailyCrawler implements ComixCrawler {
 
         boolean stop = false;
         while(!stop) {
-            rawData = comixUtil.getHtmlPageJsoup(upateUri, StoreType.MARUMARU);
+            rawData = htmlParserUtil.getHtmlPageJsoup(upateUri, StoreType.MARUMARU);
 
             // 일일 업데이트 게시판은 table tag를 이용하여 구성되어 있음.
             // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
@@ -90,15 +94,17 @@ public class DailyCrawler implements ComixCrawler {
                         .forPattern(marumaruConfig.getDateFormat())
                         .parseDateTime(date);
 
+                episode = comixUtil.getEpisode(title);
+
                 if (!today.equals(dateTime)) {
                     continue;
                 }
 
                 try {
-                    volumnUri = getVolumnUri(href);
-                    allSeriesUri = getAllSeriesUri(href);
+                    episodeUri = getEpisodeUri(href);
+                    allEpisodeUri = getAllEpisodeUri(href);
 
-                    comixPage = getComixPage(volumnUri);
+                    comixPage = htmlParserUtil.getComixImageUri(episodeUri, StoreType.MARUMARU);
 
                     comix = new Comix();
                     comix.setName(comixUtil.getComixName(title));
@@ -108,14 +114,14 @@ public class DailyCrawler implements ComixCrawler {
                     comix.setExts(comixUtil.getImageExtension(comixPage));
 
                     comix.setComixUri(href);
-                    comix.setOneVolumnUri(volumnUri);
-                    comix.setAllSeriesUri(allSeriesUri);
+                    comix.setEpisodeUri(episodeUri);
+                    comix.setAllEpisodeUri(allEpisodeUri);
                     comix.setImageUris(comixPage);
 
                     comix.setDownloadPath(homePath.resolve(title));
                     comix.setServicePath(servicePath.resolve(title));
 
-                    comix.setVolumn(comixUtil.getVolumn(title));
+                    comix.setEpisode(comixUtil.getEpisode(title));
 
                     log.info(" ### comix info = {}", comix);
 
@@ -143,8 +149,8 @@ public class DailyCrawler implements ComixCrawler {
     }
 
     // 업데이트 된 화에 해당하는 uri를 돌려 준다
-    private String getVolumnUri(String uri) throws IOException {
-        Document rawData = comixUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
+    private String getEpisodeUri(String uri) throws IOException {
+        Document rawData = htmlParserUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
 
 //        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
 
@@ -159,8 +165,9 @@ public class DailyCrawler implements ComixCrawler {
         return viewPageUrl;
     }
 
-    private String getAllSeriesUri(String uri) throws IOException {
-        Document rawData = comixUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
+    // 전체 화가 있는 page url을 돌려 준다.
+    private String getAllEpisodeUri(String uri) throws IOException {
+        Document rawData = htmlParserUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
 
         Elements contentATags = rawData.select("#vContent a"); // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
 
@@ -171,27 +178,6 @@ public class DailyCrawler implements ComixCrawler {
 
 
         return viewPageUrl;
-    }
-
-    private List<String> getComixPage(String uri) throws IOException {
-        Document rawData = comixUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
-
-//        Document rawData = Jsoup.parse(pageSource, );
-
-        // lz-lazyload 클래스를 가진 img들
-        Elements imgs = rawData.select("img[class=lz-lazyload]");
-
-        List<String> imageUrls = new ArrayList<>();
-
-        String imgUrl;
-        for(Element img : imgs) {
-            imgUrl = UrlEscapers.urlFragmentEscaper().escape(img.attr("abs:data-src"));
-            log.debug("convert image url = {}", imgUrl);
-
-            imageUrls.add(imgUrl);
-        }
-
-        return imageUrls;
     }
 
     public String getUpdateUri(int pageNum, Document rawData) {

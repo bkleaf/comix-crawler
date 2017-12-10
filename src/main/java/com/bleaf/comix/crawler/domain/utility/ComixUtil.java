@@ -9,7 +9,6 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -67,12 +66,12 @@ public class ComixUtil {
     public boolean isShort(String title) {
         Preconditions.checkNotNull(title, "title is null");
 
-        String page = this.getVolumn(title);
+        String page = this.getEpisode(title);
 
         return Strings.isNullOrEmpty(page);
     }
 
-    public String getVolumn(String title) {
+    public String getEpisode(String title) {
         String page = null;
         if(!title.endsWith("화")) return page;
 
@@ -152,61 +151,10 @@ public class ComixUtil {
     }
 
     public String checkTitle(String title) {
-        return title.replaceAll("[\\/:*?<>|.]", " ").trim();
-    }
+        title = title.replaceAll("[\\/:*?<>|.]", " ").trim();
+        title = title.replaceAll("^[\\[ㄱ-ㅎ|가-힣\\]]+", "").trim();
 
-    public Document getHtmlPageJsoup(String listUrl, StoreType storeType){
-        String pageSource = null;
-
-        String password = "";
-        if(storeType == StoreType.MARUMARU) {
-            password = marumaruConfig.getPassword();
-        }
-
-        Document preDoc = null;
-        try {
-            preDoc = Jsoup.connect(listUrl)
-                    .userAgent(UserAgent.getUserAgent())
-                    .header("charset", "utf-8")
-                    .header("Accept-Encoding", "gzip") //20171126 gzip 추가
-                    .data("pass", password)
-                    .timeout(5000)
-                    .get();
-
-        }
-        catch (Exception e) {
-            log.error("error html parsing = {} : {}", listUrl, e.getMessage());
-        }
-
-        return preDoc;
-    }
-
-    private String getHtmlPageHtmlUnit(String listUrl, StoreType storeType){
-        String pageSource = null;
-
-        WebClient webClient = new WebClient();
-        webClient.getOptions().setRedirectEnabled(true);
-
-        try{
-            WebRequest req = new WebRequest(new URL(listUrl));
-            req.setAdditionalHeader("User-Agent", UserAgent.getUserAgent());
-            req.setAdditionalHeader("Accept-Encoding", "gzip");
-            req.setHttpMethod(HttpMethod.POST);
-
-            if(storeType == StoreType.MARUMARU) {
-                req.getRequestParameters().add(new NameValuePair("pass", marumaruConfig.getPassword()));
-            }
-
-            HtmlPage page = webClient.getPage(req);
-            pageSource = page.asXml();
-        }
-        catch(Exception e){
-            log.error("error parsing htmlunit = {} : {}", listUrl, e.getMessage());
-        }
-        finally{
-            webClient.close();
-        }
-        return pageSource;
+        return title;
     }
 
     private boolean isNum(String page) {

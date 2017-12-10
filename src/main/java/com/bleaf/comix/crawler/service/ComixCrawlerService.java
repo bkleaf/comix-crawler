@@ -5,6 +5,7 @@ import com.bleaf.comix.crawler.domain.application.Compressor;
 import com.bleaf.comix.crawler.domain.application.Downloader;
 import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.marumaru.DailyCrawler;
+import com.bleaf.comix.crawler.domain.marumaru.TitleCrawler;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -34,6 +35,9 @@ public class ComixCrawlerService {
     DailyCrawler dailyCrawler;
 
     @Autowired
+    TitleCrawler titleCrawler;
+
+    @Autowired
     Downloader downloader;
 
     @Autowired
@@ -54,6 +58,36 @@ public class ComixCrawlerService {
         // home directory + 날짜(yyyyMMdd)
         try {
             if (!comixUtil.makeDownloadDirectory(date)) {
+                log.error("download date 디렉토리 또는 service date 디렉토리 생성 실패 = {}", date);
+                log.info(" ### daily crawling이 중단 되었습니다 = {}", date);
+
+                return;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        List<Comix> comixList = dailyCrawler.getComixList(today);
+
+        if(comixList == null || comixList.isEmpty()) {
+            log.error(" ### update comix list is null or size 0 = {}", today.toString("yyyyMMdd"));
+        }
+        log.info(" ### complete update comix list = {}", comixList.size());
+
+        int count = downloader.download(comixList);
+        log.info(" ### complete download = {} : {}", comixList.size(), count);
+
+        compressor.zip(comixList, today);
+        log.info(" ### complete compress");
+    }
+
+    public void titleCrawling(String comixName) {
+        log.info(" ### start crawling = {}", comixName);
+
+        titleCrawler.getComixList(comixName);
+
+        try {
+            if (!comixUtil.makeDownloadDirectory(comixName)) {
                 log.error("download date 디렉토리 또는 service date 디렉토리 생성 실패 = {}", date);
                 log.info(" ### daily crawling이 중단 되었습니다 = {}", date);
 
