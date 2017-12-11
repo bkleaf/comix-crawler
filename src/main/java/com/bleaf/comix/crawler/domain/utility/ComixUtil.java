@@ -9,6 +9,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +39,7 @@ public class ComixUtil {
     MarumaruConfig marumaruConfig;
 
     public String getComixName(String title) {
-        if (!title.endsWith("화")) return title;
+        if (!title.endsWith("화") && !title.endsWith("권")) return title;
 
         List<String> titles = Splitter.on(" ")
                 .omitEmptyStrings()
@@ -63,28 +65,54 @@ public class ComixUtil {
         return name;
     }
 
+    public boolean isImageUrl(String uri) {
+        URL url = null;
+        try {
+            url = new URL(uri);
+        } catch (MalformedURLException e) {
+            log.debug("정상 적인 URL이 아닙니다 = {}", uri);
+            return false;
+        }
+
+        if(url == null) {
+            return false;
+        }
+
+        String host = url.getHost();
+
+
+        List<String> domains = comixConfig.getImageFileDomains();
+        for(String domain : domains) {
+            if(CharMatcher.anyOf(domain).matchesAllOf(host)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public boolean isShort(String title) {
         Preconditions.checkNotNull(title, "title is null");
 
-        String page = this.getEpisode(title);
+        String episode = this.getEpisode(title);
 
-        return Strings.isNullOrEmpty(page);
+        return Strings.isNullOrEmpty(episode);
     }
 
     public String getEpisode(String title) {
-        String page = null;
-        if(!title.endsWith("화")) return page;
+        String episode = null;
+        if(!title.endsWith("화") && !title.endsWith("권")) return episode;
 
         List<String> titles = Splitter.on(" ")
                 .omitEmptyStrings()
                 .splitToList(title);
 
         String lastChar = titles.get((titles.size() - 1));
-        page = lastChar.replaceAll("[a-z|A-Z|ㄱ-ㅎ|가-힣]", "");
+        episode = lastChar.replaceAll("[a-z|A-Z|ㄱ-ㅎ|가-힣]", "");
 
-        log.debug("last char = {} : convert page = {}", lastChar, page);
+        log.debug("last char = {} : convert page = {}", lastChar, episode);
 
-        return page;
+        return episode;
     }
 
     public boolean makeDownloadDirectory(String directoryName) throws IOException {
@@ -152,7 +180,7 @@ public class ComixUtil {
 
     public String checkTitle(String title) {
         title = title.replaceAll("[\\/:*?<>|.]", " ").trim();
-        title = title.replaceAll("^[\\[ㄱ-ㅎ|가-힣\\]]+", "").trim();
+        title = title.replaceAll("^\\[[ㄱ-ㅎ|가-힣]\\]+", "").trim();
 
         return title;
     }

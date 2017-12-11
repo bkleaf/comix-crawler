@@ -25,8 +25,7 @@ public class Compressor {
     @Autowired
     ComixConfig comixConfig;
 
-    public void zip(List<Comix> comixList, DateTime date) {
-        String strDt = date.toString("yyyyMMdd");
+    public void zip(List<Comix> comixList) {
         Path servicePath;
 
         Path zipPath, comixPath;

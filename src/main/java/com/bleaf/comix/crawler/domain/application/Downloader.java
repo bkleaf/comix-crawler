@@ -85,9 +85,9 @@ public class Downloader {
         int page = 1;
         String ext;
 
-        Stopwatch sw = null;
+        Stopwatch sw;
 
-        HttpURLConnection httpURLConnection = null;
+        HttpURLConnection httpURLConnection;
         for (String imgUrl : imageUrls) {
             sw = Stopwatch.createStarted();
             ext = com.google.common.io.Files.getFileExtension(imgUrl);

@@ -7,7 +7,9 @@ import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.bleaf.comix.crawler.domain.utility.HtmlParserUtil;
 import com.bleaf.comix.crawler.domain.utility.StoreType;
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.net.UrlEscapers;
@@ -21,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -45,32 +49,23 @@ public class TitleCrawler implements ComixCrawler {
 
     @Override
     public List<Comix> getComixList(String comixName) {
-        // String pageSource에서 Jsoup doc으로 변경할 경우, base uri가 없으면
-        // abs:href 에서 empty가 return 된다.
-//        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
-
         List<Comix> comixes = Lists.newArrayList();
         Path homePath = Paths.get(comixConfig.getBasePath());
         Path servicePath = Paths.get(comixConfig.getServicePath());
 
         Comix comix;
 
-        String name, title, date, href, episodeUri;
+        String originalTitle, title, href, episodeUri;
         Map<String, String> allEpisodeUriMap;
         List<String> comixPage;
 
-        DateTime dateTime = null;
-
         Document rawData;
-
-        int pageNum = 1;
 
         String searchUri = marumaruConfig.getTitleUri()
                 + UrlEscapers.urlFormParameterEscaper().escape(comixName);
 
         log.info(" ### start download comix = {} : {}", comixName, searchUri);
 
-        boolean stop = false;
         rawData = htmlParserUtil.getHtmlPageJsoup(searchUri, StoreType.MARUMARU);
 
         // 일일 업데이트 게시판은 table tag를 이용하여 구성되어 있음.
@@ -89,9 +84,10 @@ public class TitleCrawler implements ComixCrawler {
             Elements articleDiv = article.select("div.sbjbox b");
 
             // 두 번째 div에서 제목을 얻어낸다.
-            title = comixUtil.checkTitle(articleDiv.get(0).ownText());
+            originalTitle = articleDiv.get(0).ownText();
+            title = comixUtil.checkTitle(originalTitle);
 
-            if (!title.equalsIgnoreCase(comixName)) continue;
+            if (!originalTitle.equalsIgnoreCase(comixName)) continue;
 
             allEpisodeUriMap = getAllEpisodeUri(href);
 
@@ -147,9 +143,22 @@ public class TitleCrawler implements ComixCrawler {
         String href, title, episode;
         for(Element cont : contentATags) {
             href = cont.attr("abs:href");
+
+            if(!comixUtil.isImageUrl(href)) {
+                continue;
+            }
+
             title = comixUtil.checkTitle(cont.ownText());
 
+            if(Strings.isNullOrEmpty(title)) {
+                title = comixUtil.checkTitle(cont.getElementsByTag("font").text());
+            }
+
             episode = comixUtil.getEpisode(title);
+
+            if(episode == null) {
+                episode = "one";
+            }
 
             episodeUriMap.put(episode, href);
         }

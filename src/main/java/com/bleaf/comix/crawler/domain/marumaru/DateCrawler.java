@@ -26,7 +26,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class DailyCrawler implements ComixCrawler {
+public class DateCrawler implements ComixCrawler {
     @Autowired
     MarumaruConfig marumaruConfig;
 

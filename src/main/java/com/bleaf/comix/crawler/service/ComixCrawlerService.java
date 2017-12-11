@@ -1,27 +1,18 @@
 package com.bleaf.comix.crawler.service;
 
-import com.bleaf.comix.crawler.configuration.UserAgent;
 import com.bleaf.comix.crawler.domain.application.Compressor;
 import com.bleaf.comix.crawler.domain.application.Downloader;
 import com.bleaf.comix.crawler.domain.dto.Comix;
-import com.bleaf.comix.crawler.domain.marumaru.DailyCrawler;
+import com.bleaf.comix.crawler.domain.marumaru.DateCrawler;
 import com.bleaf.comix.crawler.domain.marumaru.TitleCrawler;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -32,7 +23,7 @@ public class ComixCrawlerService {
     ComixUtil comixUtil;
 
     @Autowired
-    DailyCrawler dailyCrawler;
+    DateCrawler dateCrawler;
 
     @Autowired
     TitleCrawler titleCrawler;
@@ -44,7 +35,7 @@ public class ComixCrawlerService {
     Compressor compressor;
 
 
-    public void dailyCrawling() {
+    public void crawlingByDate() {
 
         String date = new DateTime().toString("yyyyMMdd");
 
@@ -67,7 +58,7 @@ public class ComixCrawlerService {
             e.printStackTrace();
         }
 
-        List<Comix> comixList = dailyCrawler.getComixList(today);
+        List<Comix> comixList = dateCrawler.getComixList(today);
 
         if(comixList == null || comixList.isEmpty()) {
             log.error(" ### update comix list is null or size 0 = {}", today.toString("yyyyMMdd"));
@@ -77,19 +68,19 @@ public class ComixCrawlerService {
         int count = downloader.download(comixList);
         log.info(" ### complete download = {} : {}", comixList.size(), count);
 
-        compressor.zip(comixList, today);
+        compressor.zip(comixList);
         log.info(" ### complete compress");
     }
 
-    public void titleCrawling(String comixName) {
+    public void crawlingByName(String comixName) {
         log.info(" ### start crawling = {}", comixName);
 
-        titleCrawler.getComixList(comixName);
-
         try {
-            if (!comixUtil.makeDownloadDirectory(comixName)) {
-                log.error("download date 디렉토리 또는 service date 디렉토리 생성 실패 = {}", date);
-                log.info(" ### daily crawling이 중단 되었습니다 = {}", date);
+            // 디렉토리 생성시에는 금지 문자를 체크 하여 생성한다
+            // window와 linux 쪽의 금지 문자가 다르다
+            if (!comixUtil.makeDownloadDirectory(comixUtil.checkTitle(comixName))) {
+                log.error("download date 디렉토리 또는 service comix 디렉토리 생성 실패 = {}", comixName);
+                log.info(" ### title crawling이 중단 되었습니다 = {}", comixName);
 
                 return;
             }
@@ -97,17 +88,18 @@ public class ComixCrawlerService {
             e.printStackTrace();
         }
 
-        List<Comix> comixList = dailyCrawler.getComixList(today);
+        List<Comix> comixList = titleCrawler.getComixList(comixName);
 
         if(comixList == null || comixList.isEmpty()) {
-            log.error(" ### update comix list is null or size 0 = {}", today.toString("yyyyMMdd"));
+            log.error(" ### comix list is null or size 0 = {}", comixName);
         }
-        log.info(" ### complete update comix list = {}", comixList.size());
+
+        log.info(" ### complete comix list = {}", comixList.size());
 
         int count = downloader.download(comixList);
         log.info(" ### complete download = {} : {}", comixList.size(), count);
 
-        compressor.zip(comixList, today);
+        compressor.zip(comixList);
         log.info(" ### complete compress");
     }
 }
