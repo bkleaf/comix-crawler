@@ -1,12 +1,16 @@
 package com.bleaf.comix.crawler;
 
 import com.bleaf.comix.crawler.configuration.MarumaruConfig;
+import com.bleaf.comix.crawler.configuration.UserAgent;
 import com.bleaf.comix.crawler.domain.application.Compressor;
 import com.bleaf.comix.crawler.domain.application.Downloader;
 import com.bleaf.comix.crawler.domain.marumaru.DateCrawler;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
+import com.bleaf.comix.crawler.domain.utility.HtmlParserUtil;
 import com.bleaf.comix.crawler.service.ComixCrawlerService;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -36,6 +40,9 @@ public class ComixCrawlerApplication implements CommandLineRunner {
 	@Autowired
 	MarumaruConfig marumaruConfig;
 
+	@Autowired
+	HtmlParserUtil htmlParserUtil;
+
 	public static void main(String[] args) {
 		SpringApplication.run(ComixCrawlerApplication.class, args);
 	}
@@ -52,6 +59,9 @@ public class ComixCrawlerApplication implements CommandLineRunner {
 //
 //		log.info("ist = {}", list.size());
 
-		comixCrawlerService.crawlingByName("이 녀석, 나를 좋아하는 건가?!");
+//		comixCrawlerService.crawlingByName("이 녀석, 나를 좋아하는 건가?!");
+
+
+		htmlParserUtil.getImageUriFromWasabi(null, null);
 	}
 }

@@ -11,7 +11,9 @@ import com.google.common.base.CharMatcher;
 import com.google.common.collect.Lists;
 import com.google.common.net.UrlEscapers;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -49,7 +51,25 @@ public class HtmlParserUtil {
     }
 
     public List<String> getImageUriFromWasabi(String uri, StoreType storeType) throws IOException {
-        Document rawData = this.getHtmlPageJsoup(uri, storeType);
+//        Document rawData = this.getHtmlPageJsoup(uri, storeType);
+
+        Document rawData = null;
+        try {
+            Connection.Response response = Jsoup.connect("http://wasabisyrup.com/archives/qfyfvtOPgKQ?type=pass")
+                    .userAgent(UserAgent.getUserAgent())
+                    .header("charset", "utf-8")
+                    .header("Accept-Encoding", "gzip") //20171126 gzip 추가
+                    .data("Cookie", "__cfduid=d2e577e6d8f5ffc55a86d95b3dbf95d7d1513035663; PHPSESSID=94b70d1b9c78f4476a0c8dd322963fda; _ga=GA1.2.1158025461.1513035662; _gid=GA1.2.1794056051.1513035662; cf_clearance=59c34d2be3544ac3421164bef6ca7e70fca7cacd-1513035848-3600")
+                    .data("pass", "qndxkr")
+                    .data("Referer", "http://wasabisyrup.com/archives/qfyfvtOPgKQ?type=pass")
+                    .timeout(5000)
+                    .method(Connection.Method.POST)
+                    .execute();
+
+            rawData = response.parse();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // lz-lazyload 클래스를 가진 img들
         Elements imgs = rawData.select("img[class=lz-lazyload]");

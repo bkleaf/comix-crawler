@@ -15,4 +15,5 @@ public class MarumaruConfig {
     String titleUri;
     String password;
     String dateFormat;
+    String Cookie;
 }
