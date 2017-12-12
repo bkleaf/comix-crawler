@@ -6,6 +6,12 @@ bleaf:
       title_uri: "http://marumaru.in/?r=home&mod=search&x=0&y=0&keyword="
       password: "qndxkr"
       date_format: "yyyy.MM.dd"
+      cookies:
+        "PHPSESSID": "b63cc21aacadec4174200fbe620079ee"
+        "__cfduid": "dd657255b4975aec68103765a5830c00d1513085946"
+        "_ga": "GA1.2.941182890.1513085949"
+        "_gid": "GA1.2.1621272001.1513085949"
+        "cf_clearance": "80b4bed1c8614c10951a79f79c468d64d6eae368"
     crawler:
       base_path: "/Users/bleaf/Documents/comix"
       service_path: "/Users/bleaf/Documents/comix/service"
@@ -25,7 +31,7 @@ spring:
       hibernate:
         format_sql: true
   profiles:
-    active: mac
+    active: win
 
 ---
 

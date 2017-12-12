@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Map;
+
 @Slf4j
 @Data
 @Configuration
@@ -15,5 +17,5 @@ public class MarumaruConfig {
     String titleUri;
     String password;
     String dateFormat;
-    String Cookie;
+    Map cookies;
 }

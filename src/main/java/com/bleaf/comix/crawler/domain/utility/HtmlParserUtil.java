@@ -8,6 +8,8 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.net.UrlEscapers;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +26,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -37,8 +41,9 @@ public class HtmlParserUtil {
 
     public List<String> getComixImageUri(String uri, StoreType storeType) {
         try {
-            String host = new URL(uri).getHost();
-            if(CharMatcher.anyOf("wasabisyrub").matchesAllOf(uri)) {
+            String domainName = getDomainName(new URL(uri).getHost());
+
+            if(domainName.toLowerCase().equals("wasabisyrup")) {
                 return this.getImageUriFromWasabi(uri, storeType);
             }
         } catch (MalformedURLException e) {
@@ -51,25 +56,39 @@ public class HtmlParserUtil {
     }
 
     public List<String> getImageUriFromWasabi(String uri, StoreType storeType) throws IOException {
-//        Document rawData = this.getHtmlPageJsoup(uri, storeType);
+        Document rawData = this.getHtmlPageJsoup(uri, storeType);
 
-        Document rawData = null;
-        try {
-            Connection.Response response = Jsoup.connect("http://wasabisyrup.com/archives/qfyfvtOPgKQ?type=pass")
-                    .userAgent(UserAgent.getUserAgent())
-                    .header("charset", "utf-8")
-                    .header("Accept-Encoding", "gzip") //20171126 gzip 추가
-                    .data("Cookie", "__cfduid=d2e577e6d8f5ffc55a86d95b3dbf95d7d1513035663; PHPSESSID=94b70d1b9c78f4476a0c8dd322963fda; _ga=GA1.2.1158025461.1513035662; _gid=GA1.2.1794056051.1513035662; cf_clearance=59c34d2be3544ac3421164bef6ca7e70fca7cacd-1513035848-3600")
-                    .data("pass", "qndxkr")
-                    .data("Referer", "http://wasabisyrup.com/archives/qfyfvtOPgKQ?type=pass")
-                    .timeout(5000)
-                    .method(Connection.Method.POST)
-                    .execute();
-
-            rawData = response.parse();
-        } catch (Exception e) {
-            e.printStackTrace();
+        // i am not robot page 라는 얘기가 됨.
+        if(rawData == null) {
+            if(storeType == StoreType.MARUMARU) {
+                rawData = this.getMarumaruRobotPage(uri);
+            }
         }
+
+//        Document rawData = null;
+//        Map cookies = new HashMap() ;
+//        cookies.put("PHPSESSID", "b63cc21aacadec4174200fbe620079ee");
+//        cookies.put("__cfduid", "dd657255b4975aec68103765a5830c00d1513085946");
+//        cookies.put("_ga", "GA1.2.941182890.1513085949");
+//        cookies.put("_gid", "GA1.2.1621272001.1513085949");
+//        cookies.put("cf_clearance", "80b4bed1c8614c10951a79f79c468d64d6eae368");
+//
+//        try {
+//            Connection.Response response = Jsoup.connect("http://wasabisyrup.com/archives/qfyfvtOPgKQ")
+//                    .userAgent(UserAgent.getUserAgent())
+//                    .header("charset", "utf-8")
+//                    .header("Accept-Encoding", "gzip") //20171126 gzip 추가
+//                    .cookies(marumaruConfig.getCookies())
+//                    .data("pass", "qndxkr")
+//                    .data("Referer", "http://wasabisyrup.com/archives/qfyfvtOPgKQ?type=pass")
+//                    .timeout(5000)
+//                    .method(Connection.Method.GET)
+//                    .execute();
+//
+//            rawData = response.parse();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         // lz-lazyload 클래스를 가진 img들
         Elements imgs = rawData.select("img[class=lz-lazyload]");
@@ -87,20 +106,12 @@ public class HtmlParserUtil {
     }
 
     public Document getHtmlPageJsoup(String listUrl, StoreType storeType){
-        String pageSource = null;
-
-        String password = "";
-        if(storeType == StoreType.MARUMARU) {
-            password = marumaruConfig.getPassword();
-        }
-
         Document preDoc = null;
         try {
             preDoc = Jsoup.connect(listUrl)
                     .userAgent(UserAgent.getUserAgent())
                     .header("charset", "utf-8")
                     .header("Accept-Encoding", "gzip") //20171126 gzip 추가
-                    .data("pass", password)
                     .timeout(5000)
                     .get();
 
@@ -110,6 +121,29 @@ public class HtmlParserUtil {
         }
 
         return preDoc;
+    }
+
+    private Document getMarumaruRobotPage(String listUri) {
+        Connection.Response response = null;
+        Document rawData = null;
+        try {
+            response = Jsoup.connect(listUri)
+                        .userAgent(UserAgent.getUserAgent())
+                        .header("charset", "utf-8")
+                        .header("Accept-Encoding", "gzip") //20171126 gzip 추가
+                        .cookies(marumaruConfig.getCookies())
+                        .data("pass", marumaruConfig.getPassword())
+                        .data("Referer", listUri + "?type=pass")
+                        .timeout(5000)
+                        .method(Connection.Method.GET)
+                        .execute();
+
+            rawData = response.parse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return rawData;
     }
 
     private String getHtmlPageHtmlUnit(String listUrl, StoreType storeType){
@@ -122,7 +156,7 @@ public class HtmlParserUtil {
             WebRequest req = new WebRequest(new URL(listUrl));
             req.setAdditionalHeader("User-Agent", UserAgent.getUserAgent());
             req.setAdditionalHeader("Accept-Encoding", "gzip");
-            req.setHttpMethod(HttpMethod.POST);
+            req.setHttpMethod(HttpMethod.GET);
 
             if(storeType == StoreType.MARUMARU) {
                 req.getRequestParameters().add(new NameValuePair("pass", marumaruConfig.getPassword()));
@@ -138,5 +172,18 @@ public class HtmlParserUtil {
             webClient.close();
         }
         return pageSource;
+    }
+
+    private String getDomainName(String host) {
+        Preconditions.checkNotNull(host, "host name is null");
+
+        log.debug("host name = {}", host);
+        List<String> hosts = Splitter.on(".").trimResults().splitToList(host);
+
+        if(hosts.size() == 1 ) {
+            return null;
+        }
+
+        return hosts.get(hosts.size() - 2);
     }
 }

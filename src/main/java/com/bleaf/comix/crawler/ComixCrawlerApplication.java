@@ -59,9 +59,6 @@ public class ComixCrawlerApplication implements CommandLineRunner {
 //
 //		log.info("ist = {}", list.size());
 
-//		comixCrawlerService.crawlingByName("이 녀석, 나를 좋아하는 건가?!");
-
-
-		htmlParserUtil.getImageUriFromWasabi(null, null);
+		comixCrawlerService.crawlingByName("이 녀석, 나를 좋아하는 건가?!");
 	}
 }
