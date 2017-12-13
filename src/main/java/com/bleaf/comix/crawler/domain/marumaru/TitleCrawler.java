@@ -34,7 +34,7 @@ import java.util.Map;
 @Data
 @Slf4j
 @Service
-public class TitleCrawler implements ComixCrawler {
+public class TitleCrawler {
     @Autowired
     MarumaruConfig marumaruConfig;
 
@@ -47,15 +47,17 @@ public class TitleCrawler implements ComixCrawler {
     @Autowired
     HtmlParserUtil htmlParserUtil;
 
-    @Override
     public List<Comix> getComixList(String comixName) {
         List<Comix> comixes = Lists.newArrayList();
-        Path homePath = Paths.get(comixConfig.getBasePath());
-        Path servicePath = Paths.get(comixConfig.getServicePath());
+
+        // base path / {comixName} / {comixName} + 화
+        // 구조를 가져야 해서 home 및 service는 기본 paht에 코믹스 네임 밑으로 생성 시킨다
+        Path homePath = Paths.get(comixConfig.getBasePath(), comixUtil.checkTitle(comixName));
+        Path servicePath = Paths.get(comixConfig.getServicePath(), comixUtil.checkTitle(comixName));
 
         Comix comix;
 
-        String originalTitle, title, href, episodeUri;
+        String originalTitle, href, episodeUri;
         Map<String, String> allEpisodeUriMap;
         List<String> comixPage;
 
@@ -85,7 +87,6 @@ public class TitleCrawler implements ComixCrawler {
 
             // 두 번째 div에서 제목을 얻어낸다.
             originalTitle = articleDiv.get(0).ownText();
-            title = comixUtil.checkTitle(originalTitle);
 
             if (!originalTitle.equalsIgnoreCase(comixName)) continue;
 
@@ -96,15 +97,15 @@ public class TitleCrawler implements ComixCrawler {
                 continue;
             }
 
-            for(String episode : allEpisodeUriMap.keySet()) {
-                episodeUri = allEpisodeUriMap.get(episode);
+            for(String comixTitle : allEpisodeUriMap.keySet()) {
+                episodeUri = allEpisodeUriMap.get(comixTitle);
 
                 log.debug(" ### episode {} image url parsing = {}", episodeUri);
                 comixPage = htmlParserUtil.getComixImageUri(episodeUri, StoreType.MARUMARU);
 
                 comix = new Comix();
                 comix.setName(comixName);
-                comix.setTitle(title);
+                comix.setTitle(comixTitle);
 
                 comix.setShortComix(allEpisodeUriMap.size() == 1);
                 comix.setExts(comixUtil.getImageExtension(comixPage));
@@ -113,10 +114,12 @@ public class TitleCrawler implements ComixCrawler {
                 comix.setAllEpisodeUri(href);
                 comix.setImageUris(comixPage);
 
-                comix.setDownloadPath(homePath.resolve(title));
-                comix.setServicePath(servicePath.resolve(title));
+                comix.setDownloadPath(homePath.resolve(comixTitle));
+                comix.setServicePath(servicePath.resolve(comixTitle));
 
-                comix.setEpisode(episode);
+                if(!comix.isShortComix()) {
+                    comix.setEpisode(comixUtil.getEpisode(comixTitle));
+                }
 
                 log.info(" ### comix info = {}", comix);
 
@@ -127,9 +130,89 @@ public class TitleCrawler implements ComixCrawler {
         return comixes;
     }
 
-    @Override
-    public List<Comix> getComixList(DateTime today) {
-        return null;
+    public List<Comix> getComixList(String comixName, String range) {
+        List<Comix> comixes = Lists.newArrayList();
+
+        // base path / {comixName} / {comixName} + 화
+        // 구조를 가져야 해서 home 및 service는 기본 paht에 코믹스 네임 밑으로 생성 시킨다
+        Path homePath = Paths.get(comixConfig.getBasePath(), comixUtil.checkTitle(comixName));
+        Path servicePath = Paths.get(comixConfig.getServicePath(), comixUtil.checkTitle(comixName));
+
+        Comix comix;
+
+        String originalTitle, href, episodeUri, episode;
+        boolean shortComix;
+        Map<String, String> allEpisodeUriMap;
+        List<String> comixPage;
+
+        Document rawData;
+
+        String searchUri = marumaruConfig.getTitleUri()
+                + UrlEscapers.urlFormParameterEscaper().escape(comixName);
+
+        log.info(" ### start download comix = {} : {}", comixName, searchUri);
+
+        rawData = htmlParserUtil.getHtmlPageJsoup(searchUri, StoreType.MARUMARU);
+
+        // 일일 업데이트 게시판은 table tag를 이용하여 구성되어 있음.
+        // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
+        Elements articles = rawData.select("#s_post div.postbox a");
+
+        List<String> episodeList = comixUtil.getEpisodeRange(range);
+        for (Element article : articles) {
+            // "abs: => url의 절대 값을 가지고 올 때 사용하는 키워드"
+            // href="/c/26"일경우,
+            // .attr("href") = /c/26
+            // .attr("abs:href") = http://www.marumaru.in/c/26"
+            // 제목에 해당하는 만화의 전체 화가 있는 page uri를 돌려준다.
+            href = article.attr("abs:href");
+
+            // a 태그 안에 포함된 div들
+            Elements articleDiv = article.select("div.sbjbox b");
+
+            // 두 번째 div에서 제목을 얻어낸다.
+            originalTitle = articleDiv.get(0).ownText();
+
+            if (!originalTitle.equalsIgnoreCase(comixName)) continue;
+
+            allEpisodeUriMap = getAllEpisodeUri(href);
+
+            if(allEpisodeUriMap.size() <= 0) {
+                log.error(" 전체 uri을 가져오는데 실패하였습니다.");
+                continue;
+            }
+
+            for(String comixTitle : allEpisodeUriMap.keySet()) {
+                episodeUri = allEpisodeUriMap.get(comixTitle);
+
+                log.debug(" ### episode {} image url parsing = {}", episodeUri);
+                comixPage = htmlParserUtil.getComixImageUri(episodeUri, StoreType.MARUMARU);
+
+                comix = new Comix();
+                comix.setName(comixName);
+                comix.setTitle(comixTitle);
+
+                comix.setShortComix(allEpisodeUriMap.size() == 1);
+                comix.setExts(comixUtil.getImageExtension(comixPage));
+
+                comix.setComixUri(href);
+                comix.setAllEpisodeUri(href);
+                comix.setImageUris(comixPage);
+
+                comix.setDownloadPath(homePath.resolve(comixTitle));
+                comix.setServicePath(servicePath.resolve(comixTitle));
+
+                if(!comix.isShortComix()) {
+                    comix.setEpisode(comixUtil.getEpisode(comixTitle));
+                }
+
+                log.info(" ### comix info = {}", comix);
+
+                comixes.add(comix);
+            }
+        }
+
+        return comixes;
     }
 
     private Map<String, String> getAllEpisodeUri(String uri) {
@@ -140,7 +223,7 @@ public class TitleCrawler implements ComixCrawler {
         Document rawData = htmlParserUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
         Elements contentATags = rawData.select("#vContent a");
 
-        String href, title, episode;
+        String href, title;
         for(Element cont : contentATags) {
             href = cont.attr("abs:href");
 
@@ -154,13 +237,7 @@ public class TitleCrawler implements ComixCrawler {
                 title = comixUtil.checkTitle(cont.getElementsByTag("font").text());
             }
 
-            episode = comixUtil.getEpisode(title);
-
-            if(episode == null) {
-                episode = "one";
-            }
-
-            episodeUriMap.put(episode, href);
+            episodeUriMap.put(title, href);
         }
 
         return episodeUriMap;

@@ -9,10 +9,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
+import com.google.common.base.*;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -27,6 +24,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -176,6 +174,44 @@ public class ComixUtil {
         }
 
         return exts;
+    }
+
+    public List<String> getEpisodeRange(String range) {
+        if(range == null) return null;
+
+        List<String> arrRange = Splitter.on(",")
+                .trimResults()
+                .omitEmptyStrings()
+                .splitToList(range);
+
+        List<String> episodeList = Lists.newArrayList();
+        for(String episode : arrRange) {
+            if(isNum(episode)) {
+                episodeList.add(episode);
+            } else {
+                if(!CharMatcher.is('-').matchesAllOf(episode)) continue;
+
+                List<String> list = Splitter.on("-")
+                        .trimResults()
+                        .splitToList(episode);
+
+                if(list.size() != 2) continue;;
+
+                try {
+                    int startIdx = Integer.parseInt(list.get(0));
+                    int endIdx = Integer.parseInt(list.get(1));
+
+                    for (int i = startIdx; i <= endIdx; i++) {
+                        episodeList.add("" + i);
+                    }
+                }catch (NumberFormatException e) {
+                    log.error("다운 로드 범위 지정이 잘못 되었습니다 = {} - {}", list.get(0), list.get(1));
+                    continue;
+                }
+            }
+        }
+
+        return episodeList;
     }
 
     public String checkTitle(String title) {

@@ -26,7 +26,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class DateCrawler implements ComixCrawler {
+public class DateCrawler {
     @Autowired
     MarumaruConfig marumaruConfig;
 
@@ -39,7 +39,6 @@ public class DateCrawler implements ComixCrawler {
     @Autowired
     HtmlParserUtil htmlParserUtil;
 
-    @Override
     public List<Comix> getComixList(DateTime today) {
         // String pageSource에서 Jsoup doc으로 변경할 경우, base uri가 없으면
         // abs:href 에서 empty가 return 된다.
@@ -141,11 +140,6 @@ public class DateCrawler implements ComixCrawler {
         }
 
         return comixes;
-    }
-
-    @Override
-    public List<Comix> getComixList(String comixName) {
-        return null;
     }
 
     // 업데이트 된 화에 해당하는 uri를 돌려 준다

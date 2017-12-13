@@ -65,31 +65,6 @@ public class HtmlParserUtil {
             }
         }
 
-//        Document rawData = null;
-//        Map cookies = new HashMap() ;
-//        cookies.put("PHPSESSID", "b63cc21aacadec4174200fbe620079ee");
-//        cookies.put("__cfduid", "dd657255b4975aec68103765a5830c00d1513085946");
-//        cookies.put("_ga", "GA1.2.941182890.1513085949");
-//        cookies.put("_gid", "GA1.2.1621272001.1513085949");
-//        cookies.put("cf_clearance", "80b4bed1c8614c10951a79f79c468d64d6eae368");
-//
-//        try {
-//            Connection.Response response = Jsoup.connect("http://wasabisyrup.com/archives/qfyfvtOPgKQ")
-//                    .userAgent(UserAgent.getUserAgent())
-//                    .header("charset", "utf-8")
-//                    .header("Accept-Encoding", "gzip") //20171126 gzip 추가
-//                    .cookies(marumaruConfig.getCookies())
-//                    .data("pass", "qndxkr")
-//                    .data("Referer", "http://wasabisyrup.com/archives/qfyfvtOPgKQ?type=pass")
-//                    .timeout(5000)
-//                    .method(Connection.Method.GET)
-//                    .execute();
-//
-//            rawData = response.parse();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
         // lz-lazyload 클래스를 가진 img들
         Elements imgs = rawData.select("img[class=lz-lazyload]");
 
