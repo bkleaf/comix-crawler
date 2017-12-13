@@ -39,6 +39,7 @@ public class DateCrawler {
     @Autowired
     HtmlParserUtil htmlParserUtil;
 
+
     public List<Comix> getComixList(DateTime today) {
         // String pageSource에서 Jsoup doc으로 변경할 경우, base uri가 없으면
         // abs:href 에서 empty가 return 된다.

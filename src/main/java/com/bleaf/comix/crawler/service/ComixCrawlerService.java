@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -34,11 +35,13 @@ public class ComixCrawlerService {
     @Autowired
     Compressor compressor;
 
-
+    @Scheduled(cron = "0, 0, 2, *, *, ?")
     public void crawlingByDate() {
-
         String date = new DateTime().toString("yyyyMMdd");
+        this.crawlingByDate(date);
+    }
 
+    public void crawlingByDate(String date) {
         DateTime today = DateTimeFormat
                 .forPattern("yyyyMMdd")
                 .parseDateTime(date);
@@ -73,6 +76,10 @@ public class ComixCrawlerService {
     }
 
     public void crawlingByName(String comixName) {
+        this.crawlingByName(comixName, null);
+    }
+
+    public void crawlingByName(String comixName, String range) {
         log.info(" ### start crawling = {}", comixName);
 
         try {
@@ -88,7 +95,7 @@ public class ComixCrawlerService {
             e.printStackTrace();
         }
 
-        List<Comix> comixList = titleCrawler.getComixList(comixName);
+        List<Comix> comixList = titleCrawler.getComixList(comixName, range);
 
         if(comixList == null || comixList.isEmpty()) {
             log.error(" ### comix list is null or size 0 = {}", comixName);

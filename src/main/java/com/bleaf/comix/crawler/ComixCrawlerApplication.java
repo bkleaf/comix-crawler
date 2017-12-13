@@ -59,6 +59,6 @@ public class ComixCrawlerApplication implements CommandLineRunner {
 //
 //		log.info("ist = {}", list.size());
 
-		comixCrawlerService.crawlingByName("이 녀석, 나를 좋아하는 건가?!");
+		comixCrawlerService.crawlingByName("오크가 범해주질 않아!", "1,3-5");
 	}
 }

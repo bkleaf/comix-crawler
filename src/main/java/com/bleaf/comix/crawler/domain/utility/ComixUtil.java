@@ -189,7 +189,7 @@ public class ComixUtil {
             if(isNum(episode)) {
                 episodeList.add(episode);
             } else {
-                if(!CharMatcher.is('-').matchesAllOf(episode)) continue;
+                if(!CharMatcher.is('-').matchesAnyOf(episode)) continue;
 
                 List<String> list = Splitter.on("-")
                         .trimResults()
