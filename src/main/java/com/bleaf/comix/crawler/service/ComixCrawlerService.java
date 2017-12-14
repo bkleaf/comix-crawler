@@ -35,7 +35,7 @@ public class ComixCrawlerService {
     @Autowired
     Compressor compressor;
 
-    @Scheduled(cron = "0, 0, 2, *, *, ?")
+    @Scheduled(cron = "0 0 2 *  * ?")
     public void crawlingByDate() {
         String date = new DateTime().toString("yyyyMMdd");
         this.crawlingByDate(date);

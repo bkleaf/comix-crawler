@@ -2,18 +2,13 @@ package com.bleaf.comix.crawler.domain.utility;
 
 import com.bleaf.comix.crawler.configuration.ComixConfig;
 import com.bleaf.comix.crawler.configuration.MarumaruConfig;
-import com.bleaf.comix.crawler.configuration.UserAgent;
 import com.bleaf.comix.crawler.domain.dto.Comix;
-import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
-import com.google.common.base.*;
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
@@ -24,7 +19,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -37,53 +31,39 @@ public class ComixUtil {
     MarumaruConfig marumaruConfig;
 
     public String getComixName(String title) {
-        if (!title.endsWith("화") && !title.endsWith("권")) return title;
-
         List<String> titles = Splitter.on(" ")
                 .omitEmptyStrings()
                 .trimResults()
                 .splitToList(title);
 
-        String lastChar = titles.get((titles.size() - 1));
-        String page = lastChar.replaceAll("[a-z|A-Z|ㄱ-ㅎ|가-힣]", "");
+        String str;
+        int lastIdx = 0;
 
-        if (Strings.isNullOrEmpty(page)) {
-            return title;
-        }
-
-        String name = "";
+        String comixName = "";
         String whiteSpace = "";
+        for (int i = 0; i < titles.size(); i++) {
+            str = titles.get(i);
+            if (str.endsWith("화") || str.endsWith("권")) {
+                break;
+            }
 
-        int size = titles.size() - 1;
-        for(int i=0; i < size; i++) {
-            name += whiteSpace + titles.get(i);
+            comixName += whiteSpace + str;
             whiteSpace = " ";
         }
 
-        return name;
+        return comixName;
     }
 
     public boolean isImageUrl(String uri) {
-        URL url = null;
+        String domainName = null;
         try {
-            url = new URL(uri);
+            domainName = this.getDomainName(new URL(uri).getHost());
         } catch (MalformedURLException e) {
-            log.debug("정상 적인 URL이 아닙니다 = {}", uri);
-            return false;
+            e.printStackTrace();
         }
 
-        if(url == null) {
-            return false;
-        }
-
-        String host = url.getHost();
-
-
-        List<String> domains = comixConfig.getImageFileDomains();
-        for(String domain : domains) {
-            if(CharMatcher.anyOf(domain).matchesAllOf(host)) {
-                return true;
-            }
+        if (domainName != null && comixConfig.getImageFileDomains().contains(domainName.toLowerCase())) {
+            return true;
         }
 
         return false;
@@ -99,16 +79,29 @@ public class ComixUtil {
 
     public String getEpisode(String title) {
         String episode = null;
-        if(!title.endsWith("화") && !title.endsWith("권")) return episode;
 
         List<String> titles = Splitter.on(" ")
                 .omitEmptyStrings()
+                .trimResults()
                 .splitToList(title);
 
-        String lastChar = titles.get((titles.size() - 1));
-        episode = lastChar.replaceAll("[a-z|A-Z|ㄱ-ㅎ|가-힣]", "");
+        String str = null;
+        int lastIdx = 0;
 
-        log.debug("last char = {} : convert page = {}", lastChar, episode);
+        for (int i = 0; i < titles.size(); i++) {
+            str = titles.get(i);
+            if (str.endsWith("화") || str.endsWith("권")) {
+                break;
+            }
+        }
+
+        if(str == null) {
+            return episode;
+        }
+
+        episode = str.replaceAll("[a-z|A-Z|ㄱ-ㅎ|가-힣]", "");
+
+        log.debug("last char = {} : convert page = {}", str, episode);
 
         return episode;
     }
@@ -117,22 +110,22 @@ public class ComixUtil {
         Path basePath = Paths.get(comixConfig.getBasePath());
         Path servicePath = Paths.get(comixConfig.getServicePath());
 
-        if(!Files.exists(basePath))
+        if (!Files.exists(basePath))
             throw new RuntimeException("comix 다운로드 기본 디렉토리가 없습니다 = " + basePath.toAbsolutePath());
 
-        if(!Files.exists(servicePath))
+        if (!Files.exists(servicePath))
             throw new RuntimeException("comix 서비스 기본 디렉토리가 없습니다 = " + servicePath.toAbsolutePath());
 
         Path downloadDatePath = basePath.resolve(directoryName);
         Path serviceDatePath = servicePath.resolve(directoryName);
 
-        if(!Files.exists(downloadDatePath)) {
+        if (!Files.exists(downloadDatePath)) {
             Files.createDirectory(downloadDatePath);
         } else {
             log.info("다운로드 디렉토리가 이미 존재 합니다 = {}", directoryName);
         }
 
-        if(!Files.exists(serviceDatePath)) {
+        if (!Files.exists(serviceDatePath)) {
             Files.createDirectory(serviceDatePath);
         } else {
             log.info("서비스 디렉토리가 이미 존재 합니다 = {}", directoryName);
@@ -164,11 +157,11 @@ public class ComixUtil {
         List<String> exts = Lists.newArrayList();
 
         String ext;
-        for(String page : comixPages) {
+        for (String page : comixPages) {
             ext = com.google.common.io.Files.getFileExtension(page);
             log.debug("comix page file extension = {} : {}", ext, page);
 
-            if(!exts.contains(ext)) {
+            if (!exts.contains(ext)) {
                 exts.add(ext);
             }
         }
@@ -177,7 +170,7 @@ public class ComixUtil {
     }
 
     public List<String> getEpisodeRange(String range) {
-        if(range == null) return null;
+        if (range == null) return null;
 
         List<String> arrRange = Splitter.on(",")
                 .trimResults()
@@ -185,17 +178,17 @@ public class ComixUtil {
                 .splitToList(range);
 
         List<String> episodeList = Lists.newArrayList();
-        for(String episode : arrRange) {
-            if(isNum(episode)) {
+        for (String episode : arrRange) {
+            if (isNum(episode)) {
                 episodeList.add(episode);
             } else {
-                if(!CharMatcher.is('-').matchesAnyOf(episode)) continue;
+                if (!CharMatcher.is('-').matchesAnyOf(episode)) continue;
 
                 List<String> list = Splitter.on("-")
                         .trimResults()
                         .splitToList(episode);
 
-                if(list.size() != 2) continue;;
+                if (list.size() != 2) continue;
 
                 try {
                     int startIdx = Integer.parseInt(list.get(0));
@@ -204,7 +197,7 @@ public class ComixUtil {
                     for (int i = startIdx; i <= endIdx; i++) {
                         episodeList.add("" + i);
                     }
-                }catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     log.error("다운 로드 범위 지정이 잘못 되었습니다 = {} - {}", list.get(0), list.get(1));
                     continue;
                 }
@@ -221,7 +214,20 @@ public class ComixUtil {
         return title;
     }
 
-    private boolean isNum(String page) {
+    public String getDomainName(String host) {
+        Preconditions.checkNotNull(host, "host name is null");
+
+        log.debug("host name = {}", host);
+        List<String> hosts = Splitter.on(".").trimResults().splitToList(host);
+
+        if (hosts.size() == 1) {
+            return null;
+        }
+
+        return hosts.get(hosts.size() - 2);
+    }
+
+    public boolean isNum(String page) {
         try {
             Double.parseDouble(page);
         } catch (NumberFormatException e) {

@@ -1,5 +1,6 @@
 package com.bleaf.comix.crawler.domain.utility;
 
+import com.bleaf.comix.crawler.configuration.ComixConfig;
 import com.bleaf.comix.crawler.configuration.MarumaruConfig;
 import com.bleaf.comix.crawler.configuration.UserAgent;
 import com.gargoylesoftware.htmlunit.HttpMethod;
@@ -37,13 +38,16 @@ public class HtmlParserUtil {
     ComixUtil comixUtil;
 
     @Autowired
+    ComixConfig comixConfig;
+
+    @Autowired
     MarumaruConfig marumaruConfig;
 
     public List<String> getComixImageUri(String uri, StoreType storeType) {
         try {
-            String domainName = getDomainName(new URL(uri).getHost());
+            String domainName = comixUtil.getDomainName(new URL(uri).getHost());
 
-            if(domainName.toLowerCase().equals("wasabisyrup")) {
+            if (domainName != null && comixConfig.getImageFileDomains().contains(domainName.toLowerCase())) {
                 return this.getImageUriFromWasabi(uri, storeType);
             }
         } catch (MalformedURLException e) {
@@ -149,16 +153,5 @@ public class HtmlParserUtil {
         return pageSource;
     }
 
-    private String getDomainName(String host) {
-        Preconditions.checkNotNull(host, "host name is null");
 
-        log.debug("host name = {}", host);
-        List<String> hosts = Splitter.on(".").trimResults().splitToList(host);
-
-        if(hosts.size() == 1 ) {
-            return null;
-        }
-
-        return hosts.get(hosts.size() - 2);
-    }
 }

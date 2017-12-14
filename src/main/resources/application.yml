@@ -13,7 +13,7 @@ bleaf:
       base_path: "/Users/bleaf/Documents/comix"
       service_path: "/Users/bleaf/Documents/comix/service"
       image_file_domains:
-        - "wasabisyrup.com"
+        - "wasabisyrup"
 
 spring:
   datasource:
@@ -28,7 +28,7 @@ spring:
       hibernate:
         format_sql: true
   profiles:
-    active: win
+    active: mac
 
 ---
 
