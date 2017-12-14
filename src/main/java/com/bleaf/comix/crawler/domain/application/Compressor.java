@@ -25,20 +25,22 @@ public class Compressor {
     @Autowired
     ComixConfig comixConfig;
 
-    public void zip(List<Comix> comixList) {
+    public int zip(List<Comix> comixList) {
         Path servicePath;
 
         Path zipPath, comixPath;
 
         ZipArchiveEntry zipArchiveEntry;
 
+        int count = 0;
+
         ComixPageFilter comixPageFilter = new ComixPageFilter();
         File pageFile;
-        for(Comix comix : comixList) {
+        for (Comix comix : comixList) {
 
             comixPath = comix.getDownloadPath();
 
-            if(!Files.exists(comixPath)) continue;
+            if (!Files.exists(comixPath)) continue;
 
             servicePath = comix.getServicePath();
             zipPath = Paths.get(servicePath.toString() + ".zip");
@@ -48,7 +50,7 @@ public class Compressor {
             try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(zipPath.toFile());
                  DirectoryStream<Path> directoryStream = Files.newDirectoryStream(comixPath, comixPageFilter)) {
 
-                for(Path page : directoryStream) {
+                for (Path page : directoryStream) {
                     pageFile = page.toFile();
                     zipArchiveEntry = new ZipArchiveEntry(pageFile.getName());
                     zipArchiveEntry.setSize(pageFile.length());
@@ -66,7 +68,11 @@ public class Compressor {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            count += 1;
         }
+
+        return count;
     }
 }
 

@@ -7,8 +7,8 @@ bleaf:
       password: "qndxkr"
       date_format: "yyyy.MM.dd"
       cookies:
-        #"PHPSESSID": "1b065af1946ded592b3d6f88ece9bdee"
-        "PHPSESSID": "17e24e6e2ce1f1e002c424483edf01a9"
+        "PHPSESSID": "a6a32f8fe9f014abac1746592dd46d9f"
+        #"PHPSESSID": "17e24e6e2ce1f1e002c424483edf01a9"
     crawler:
       base_path: "/Users/bleaf/Documents/comix"
       service_path: "/Users/bleaf/Documents/comix/service"
@@ -28,7 +28,7 @@ spring:
       hibernate:
         format_sql: true
   profiles:
-    active: mac
+    active: win
 
 ---
 

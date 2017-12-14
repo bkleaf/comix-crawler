@@ -9,6 +9,7 @@ import com.bleaf.comix.crawler.domain.utility.HtmlParserUtil;
 import com.bleaf.comix.crawler.service.ComixCrawlerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -16,7 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Slf4j
 @EnableScheduling
 @SpringBootApplication
-public class ComixCrawlerApplication {
+public class ComixCrawlerApplication implements CommandLineRunner {
 
     @Autowired
     ComixCrawlerService comixCrawlerService;
@@ -43,18 +44,18 @@ public class ComixCrawlerApplication {
         SpringApplication.run(ComixCrawlerApplication.class, args);
     }
 
-//	@Override
-//	public void run(String... strings) throws Exception {
-////		DateTime dateTime = DateTimeFormat
-////				.forPattern("yyyyMMdd")
-////				.parseDateTime("20171209");
-////		List<Comix> list = dailyCrawler.getDailyList(dateTime);
-////
-////		downloader.download(list);
-////		compressor.zip(list, dateTime);
-////
-////		log.info("ist = {}", list.size());
+	@Override
+	public void run(String... strings) throws Exception {
+//		DateTime dateTime = DateTimeFormat
+//				.forPattern("yyyyMMdd")
+//				.parseDateTime("20171209");
+//		List<Comix> list = dailyCrawler.getDailyList(dateTime);
 //
-//		comixCrawlerService.crawlingByName("오크가 범해주질 않아!", "1,3-5");
-//	}
+//		downloader.download(list);
+//		compressor.zip(list, dateTime);
+//
+//		log.info("ist = {}", list.size());
+
+		comixCrawlerService.crawlingByName("오크가 범해주질 않아!", "1,3-5");
+	}
 }

@@ -18,14 +18,10 @@ public class CrawlerController {
     @RequestMapping("/date/{date}")
     @ResponseBody
     public DownloadResult downloadByDate(@PathVariable String date) {
-        String strDate = "" + date;
+        if(Strings.isNullOrEmpty(date) || date.length() != 8) return null;
+        log.info("download date = {}", date);
 
-        if(Strings.isNullOrEmpty(strDate) || strDate.length() != 8) return null;
-        log.info("download date = {}", strDate);
-
-        comixCrawlerService.crawlingByDate(strDate);
-
-        return new DownloadResult();
+        return comixCrawlerService.crawlingByDate(date);
     }
 
     @RequestMapping("/name/{name}")
@@ -34,9 +30,7 @@ public class CrawlerController {
         if(Strings.isNullOrEmpty(name)) return null;
         log.info("download comix name = {}", name);
 
-        comixCrawlerService.crawlingByName(name);
-
-        return new DownloadResult();
+        return comixCrawlerService.crawlingByName(name);
     }
 
     @RequestMapping("/range/{range}/{name}")
@@ -46,8 +40,6 @@ public class CrawlerController {
         if(Strings.isNullOrEmpty(name)) return null;
         log.info("download comix name, range = {} : {}", name, range);
 
-        comixCrawlerService.crawlingByName(name, range);
-
-        return new DownloadResult();
+        return comixCrawlerService.crawlingByName(name, range);
     }
 }

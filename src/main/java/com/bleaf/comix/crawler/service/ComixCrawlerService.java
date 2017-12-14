@@ -3,9 +3,11 @@ package com.bleaf.comix.crawler.service;
 import com.bleaf.comix.crawler.domain.application.Compressor;
 import com.bleaf.comix.crawler.domain.application.Downloader;
 import com.bleaf.comix.crawler.domain.dto.Comix;
+import com.bleaf.comix.crawler.domain.json.DownloadResult;
 import com.bleaf.comix.crawler.domain.marumaru.DateCrawler;
 import com.bleaf.comix.crawler.domain.marumaru.TitleCrawler;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -36,12 +38,12 @@ public class ComixCrawlerService {
     Compressor compressor;
 
     @Scheduled(cron = "0 0 2 *  * ?")
-    public void crawlingByDate() {
+    public DownloadResult crawlingByDate() {
         String date = new DateTime().toString("yyyyMMdd");
-        this.crawlingByDate(date);
+        return this.crawlingByDate(date);
     }
 
-    public void crawlingByDate(String date) {
+    public DownloadResult crawlingByDate(String date) {
         DateTime today = DateTimeFormat
                 .forPattern("yyyyMMdd")
                 .parseDateTime(date);
@@ -55,13 +57,17 @@ public class ComixCrawlerService {
                 log.error("download date 디렉토리 또는 service date 디렉토리 생성 실패 = {}", date);
                 log.info(" ### daily crawling이 중단 되었습니다 = {}", date);
 
-                return;
+                return null;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        DownloadResult downloadResult = new DownloadResult();
+        downloadResult.setDate(date);
         List<Comix> comixList = dateCrawler.getComixList(today);
+
+        this.setResultList(comixList, downloadResult);
 
         if(comixList == null || comixList.isEmpty()) {
             log.error(" ### update comix list is null or size 0 = {}", today.toString("yyyyMMdd"));
@@ -71,15 +77,21 @@ public class ComixCrawlerService {
         int count = downloader.download(comixList);
         log.info(" ### complete download = {} : {}", comixList.size(), count);
 
-        compressor.zip(comixList);
-        log.info(" ### complete compress");
+        downloadResult.setDownloadCount(count);
+
+        count = compressor.zip(comixList);
+        log.info(" ### complete compress = {} : {}", comixList.size(), count);
+
+        downloadResult.setCompressCount(count);
+
+        return downloadResult;
     }
 
-    public void crawlingByName(String comixName) {
-        this.crawlingByName(comixName, null);
+    public DownloadResult crawlingByName(String comixName) {
+        return this.crawlingByName(comixName, null);
     }
 
-    public void crawlingByName(String comixName, String range) {
+    public DownloadResult crawlingByName(String comixName, String range) {
         log.info(" ### start crawling = {}", comixName);
 
         try {
@@ -89,7 +101,7 @@ public class ComixCrawlerService {
                 log.error("download date 디렉토리 또는 service comix 디렉토리 생성 실패 = {}", comixName);
                 log.info(" ### title crawling이 중단 되었습니다 = {}", comixName);
 
-                return;
+                return null;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -101,12 +113,29 @@ public class ComixCrawlerService {
             log.error(" ### comix list is null or size 0 = {}", comixName);
         }
 
+        DownloadResult downloadResult = new DownloadResult();
+        downloadResult.setDate(new DateTime().toString("yyyyMMdd"));
+        this.setResultList(comixList, downloadResult);
+
         log.info(" ### complete comix list = {}", comixList.size());
 
         int count = downloader.download(comixList);
         log.info(" ### complete download = {} : {}", comixList.size(), count);
 
-        compressor.zip(comixList);
-        log.info(" ### complete compress");
+        downloadResult.setDownloadCount(count);
+
+        count = compressor.zip(comixList);
+        log.info(" ### complete compress = {} : {}", comixList.size(), count);
+
+        downloadResult.setCompressCount(count);
+
+        return downloadResult;
+    }
+
+    private void setResultList(List<Comix> comixList, DownloadResult downloadResult) {
+        List<String> downloadList = Lists.newArrayList();
+        for(Comix comix : comixList) {
+            downloadList.add(comix.getTitle());
+        }
     }
 }
