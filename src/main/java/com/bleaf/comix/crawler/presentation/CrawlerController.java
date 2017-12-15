@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Slf4j
 @Controller
 @RequestMapping(value="/comix")
@@ -41,5 +43,11 @@ public class CrawlerController {
         log.info("download comix name, range = {} : {}", name, range);
 
         return comixCrawlerService.crawlingByName(name, range);
+    }
+
+    @RequestMapping("config/ssid/{id}")
+    @ResponseBody
+    public Map<String, String> setMarumaruSessionId(@PathVariable String id) {
+        return comixCrawlerService.setPhpSessionId(id);
     }
 }

@@ -1,10 +1,13 @@
 package com.bleaf.comix.crawler.service;
 
+import com.bleaf.comix.crawler.configuration.ComixConfig;
+import com.bleaf.comix.crawler.configuration.MarumaruConfig;
 import com.bleaf.comix.crawler.domain.application.Compressor;
 import com.bleaf.comix.crawler.domain.application.Downloader;
 import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.json.DownloadResult;
 import com.bleaf.comix.crawler.domain.marumaru.DateCrawler;
+import com.bleaf.comix.crawler.domain.marumaru.MarumaruService;
 import com.bleaf.comix.crawler.domain.marumaru.TitleCrawler;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.google.common.collect.Lists;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -32,12 +36,15 @@ public class ComixCrawlerService {
     TitleCrawler titleCrawler;
 
     @Autowired
+    MarumaruService marumaruService;
+
+    @Autowired
     Downloader downloader;
 
     @Autowired
     Compressor compressor;
 
-    @Scheduled(cron = "0 0 2 *  * ?")
+    @Scheduled(cron = "0 55 8 *  * ?")
     public DownloadResult crawlingByDate() {
         String date = new DateTime().toString("yyyyMMdd");
         return this.crawlingByDate(date);
@@ -130,6 +137,10 @@ public class ComixCrawlerService {
         downloadResult.setCompressCount(count);
 
         return downloadResult;
+    }
+
+    public Map<String, String> setPhpSessionId(String id) {
+        return marumaruService.setPhpSessionId(id);
     }
 
     private void setResultList(List<Comix> comixList, DownloadResult downloadResult) {

@@ -17,7 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Slf4j
 @EnableScheduling
 @SpringBootApplication
-public class ComixCrawlerApplication implements CommandLineRunner {
+public class ComixCrawlerApplication {// implements CommandLineRunner {
 
     @Autowired
     ComixCrawlerService comixCrawlerService;
@@ -44,18 +44,18 @@ public class ComixCrawlerApplication implements CommandLineRunner {
         SpringApplication.run(ComixCrawlerApplication.class, args);
     }
 
-	@Override
-	public void run(String... strings) throws Exception {
-//		DateTime dateTime = DateTimeFormat
-//				.forPattern("yyyyMMdd")
-//				.parseDateTime("20171209");
-//		List<Comix> list = dailyCrawler.getDailyList(dateTime);
+//	@Override
+//	public void run(String... strings) throws Exception {
+////		DateTime dateTime = DateTimeFormat
+////				.forPattern("yyyyMMdd")
+////				.parseDateTime("20171209");
+////		List<Comix> list = dailyCrawler.getDailyList(dateTime);
+////
+////		downloader.download(list);
+////		compressor.zip(list, dateTime);
+////
+////		log.info("ist = {}", list.size());
 //
-//		downloader.download(list);
-//		compressor.zip(list, dateTime);
-//
-//		log.info("ist = {}", list.size());
-
-		comixCrawlerService.crawlingByName("오크가 범해주질 않아!", "1,3-5");
-	}
+//		comixCrawlerService.crawlingByName("오크가 범해주질 않아!", "1,3-5");
+//	}
 }
