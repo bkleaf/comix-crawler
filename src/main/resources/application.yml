@@ -7,7 +7,7 @@ bleaf:
       password: "qndxkr"
       date_format: "yyyy.MM.dd"
       cookies:
-#        "PHPSESSID": "a6a32f8fe9f014abac1746592dd46d9f"
+        "PHPSESSID": "a6a32f8fe9f014abac1746592dd46d9f"
 #        "PHPSESSID": "1b065af1946ded592b3d6f88ece9bdee"
 #        "PHPSESSID": "1b065af1946ded592b3d6f88ece9bdee"
     crawler:
@@ -27,11 +27,10 @@ spring:
       hibernate:
         format_sql: true
   profiles:
-    active: mac
+    active: win
 
 server:
   port: 52272
-
 
 ---
 

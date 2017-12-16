@@ -20,6 +20,9 @@ public class CrawlerController {
     @RequestMapping("/date/{date}")
     @ResponseBody
     public DownloadResult downloadByDate(@PathVariable String date) {
+
+        log.info("get download params = {}", date);
+
         if(Strings.isNullOrEmpty(date) || date.length() != 8) return null;
         log.info("download date = {}", date);
 
@@ -29,6 +32,8 @@ public class CrawlerController {
     @RequestMapping("/name/{name}")
     @ResponseBody
     public DownloadResult downloadByName(@PathVariable String name) {
+        log.info("get download params = {}", name);
+
         if(Strings.isNullOrEmpty(name)) return null;
         log.info("download comix name = {}", name);
 
@@ -39,6 +44,9 @@ public class CrawlerController {
     @ResponseBody
     public DownloadResult downloadByName(@PathVariable String range,
                                          @PathVariable String name) {
+
+        log.info("get download params = {} : {}", range, name);
+
         if(Strings.isNullOrEmpty(name)) return null;
         log.info("download comix name, range = {} : {}", name, range);
 
