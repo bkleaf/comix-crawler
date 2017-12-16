@@ -44,7 +44,7 @@ public class ComixCrawlerService {
     @Autowired
     Compressor compressor;
 
-    @Scheduled(cron = "0 55 8 *  * ?")
+    @Scheduled(cron = "0 0 2 *  * ?")
     public DownloadResult crawlingByDate() {
         String date = new DateTime().toString("yyyyMMdd");
         return this.crawlingByDate(date);
@@ -148,5 +148,7 @@ public class ComixCrawlerService {
         for(Comix comix : comixList) {
             downloadList.add(comix.getTitle());
         }
+
+        downloadResult.setDownloadList(downloadList);
     }
 }

@@ -7,11 +7,10 @@ bleaf:
       password: "qndxkr"
       date_format: "yyyy.MM.dd"
       cookies:
-        #"PHPSESSID": "a6a32f8fe9f014abac1746592dd46d9f"
-        "PHPSESSID": "1b065af1946ded592b3d6f88ece9bdee"
+#        "PHPSESSID": "a6a32f8fe9f014abac1746592dd46d9f"
+#        "PHPSESSID": "1b065af1946ded592b3d6f88ece9bdee"
+#        "PHPSESSID": "1b065af1946ded592b3d6f88ece9bdee"
     crawler:
-      base_path: "/Users/bleaf/Documents/comix"
-      service_path: "/Users/bleaf/Documents/comix/service"
       image_file_domains:
         - "wasabisyrup"
 
@@ -29,6 +28,10 @@ spring:
         format_sql: true
   profiles:
     active: mac
+
+server:
+  port: 52272
+
 
 ---
 
@@ -51,3 +54,14 @@ bleaf:
     crawler:
       base_path: "/Users/bleaf/Documents/comix"
       service_path: "/Users/bleaf/Documents/comix/service"
+
+---
+
+spring:
+  profiles: product
+
+bleaf:
+  comix:
+    crawler:
+      base_path: "/bleaf/comix/download"
+      service_path: "/bleaf/comix/service"
