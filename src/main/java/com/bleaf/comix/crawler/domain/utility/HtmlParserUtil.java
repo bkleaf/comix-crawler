@@ -113,7 +113,7 @@ public class HtmlParserUtil {
                         .cookies(marumaruConfig.getCookies())
                         .data("pass", marumaruConfig.getPassword())
                         .data("Referer", listUri + "?type=pass")
-                        .timeout(5000)
+                        .timeout(30000)
                         .method(Connection.Method.GET)
                         .execute();
 

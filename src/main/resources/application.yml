@@ -7,9 +7,11 @@ bleaf:
       password: "qndxkr"
       date_format: "yyyy.MM.dd"
       cookies:
-        "PHPSESSID": "a6a32f8fe9f014abac1746592dd46d9f"
+#        "PHPSESSID": "a6a32f8fe9f014abac1746592dd46d9f"
 #        "PHPSESSID": "1b065af1946ded592b3d6f88ece9bdee"
 #        "PHPSESSID": "1b065af1946ded592b3d6f88ece9bdee"
+        "PHPSESSID": "ujnuhjbubk517htsqgq7mfs663"
+        "__cfduid": "d133aab1e2d97eeb45b68a78da796636a1513405625"
     crawler:
       image_file_domains:
         - "wasabisyrup"
