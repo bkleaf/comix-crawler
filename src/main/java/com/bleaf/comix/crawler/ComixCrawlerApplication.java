@@ -14,6 +14,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -69,14 +70,24 @@ public class ComixCrawlerApplication implements CommandLineRunner {
                 , "날조트랩 -NTR- 26화 (완결)"
                 , "토바쿠 선배 뭘 걸래? 13화"
                 , "Stand Up! 6화"
-                , "카케구루이(임시) 22화"};
+                , "카케구루이(임시) 22화"
+                , "워너!@ 중 3부징 4, 4-1권"};
 
+        String titlePattern = "(^[\\wㄱ-ㅎ가-힣\\s\\-.,=+~!?*@#$%()\\[\\]{}<>]+)(\\d\\-\\d,\\s\\d\\-\\d화)";//\\s((\\d부\\s)?(\\d,\\s)*(|\\d[\\-\\.~]\\d(,\\s)?)*[화권])";
+        Pattern p1 = Pattern.compile(titlePattern);
 
+        Matcher m;
         for(String t : titles) {
-            String episode = comixUtil.getEpisode(t);
-            String cn = comixUtil.getComixName(t);
-            log.info("episode = {} : {}", cn, episode);
+            m = p1.matcher(t);
+            log.info("title = {}",m.group(0));
+//            log.info("title = {}, episode = {}",m.group(1), m.group(2));
         }
+
+//        for(String t : titles) {
+//            String episode = comixUtil.getEpisode(t);
+//            String cn = comixUtil.getComixName(t);
+//            log.info("episode = {} : {}", cn, episode);
+//        }
 
         /*
          * title 4화, title 4화 전편 title 4.5화, title 4-3, 4-4화, title 전편, title 후편, title 4-7화
