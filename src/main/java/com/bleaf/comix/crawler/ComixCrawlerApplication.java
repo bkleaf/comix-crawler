@@ -60,13 +60,23 @@ public class ComixCrawlerApplication implements CommandLineRunner {
 
 //		comixCrawlerService.crawlingByName("오크가 범해주질 않아!", "1,3-5");
 
-//        String[] titles = {"성녀의 마력은 만능입니다 4-3, 4-4화", "이종족 리뷰어즈 01~13화", "ccc 2.5화", };
-//
-//        for(String t : titles) {
-//            String episode = comixUtil.getEpisode(t);
-//            String cn = comixUtil.getComixName(t);
-//            log.info("episode = {} : {}", cn, episode);
-//        }
+        String[] titles = {"성녀의 마력은 만능입니다 4-3, 4-4화"
+                , "이종족 리뷰어즈 01~13화"
+                , "메이저 2부 97화"
+                , "소꿉친구와, 키스하고 싶지 않아. 10화"
+                , "역전! 러브게임"
+                , "장난을 잘치는 (전) 타카기 씨 22화"
+                , "날조트랩 -NTR- 26화 (완결)"
+                , "토바쿠 선배 뭘 걸래? 13화"
+                , "Stand Up! 6화"
+                , "카케구루이(임시) 22화"};
+
+
+        for(String t : titles) {
+            String episode = comixUtil.getEpisode(t);
+            String cn = comixUtil.getComixName(t);
+            log.info("episode = {} : {}", cn, episode);
+        }
 
         /*
          * title 4화, title 4화 전편 title 4.5화, title 4-3, 4-4화, title 전편, title 후편, title 4-7화
@@ -75,21 +85,21 @@ public class ComixCrawlerApplication implements CommandLineRunner {
 
 
 
-        // 4화
-        Pattern pattern1 = Pattern.compile("(^[0-9])([\\.\\-\\~][0-9])?[화권]+");
-
-        // 4-1, 4-2, 4-3, 4-4화
-
-        Pattern pattern2 = Pattern.compile("(^[0-9])([\\.\\-\\~][0-9])?\\,");
-
-        String title = "4~5화";
-
-        if(Pattern.matches("(^[0-9])([\\.\\-\\~][0-9])?[화권]+", title)) {
-            log.info("aaaaa = {}", title);
-        } else if(pattern2.matcher(title).find()){
-            log.info("bbbb = {}", title);
-        } else {
-            log.info("fail = {}", title);
-        }
+//        // 4화
+//        Pattern pattern1 = Pattern.compile("(^[0-9])([\\.\\-\\~][0-9])?[화권]+");
+//
+//        // 4-1, 4-2, 4-3, 4-4화
+//
+//        Pattern pattern2 = Pattern.compile("(^[0-9])([\\.\\-\\~][0-9])?\\,");
+//
+//        String title = "4~5화";
+//
+//        if(Pattern.matches("(^[0-9])([\\.\\-\\~][0-9])?[화권]+", title)) {
+//            log.info("aaaaa = {}", title);
+//        } else if(pattern2.matcher(title).find()){
+//            log.info("bbbb = {}", title);
+//        } else {
+//            log.info("fail = {}", title);
+//        }
 	}
 }

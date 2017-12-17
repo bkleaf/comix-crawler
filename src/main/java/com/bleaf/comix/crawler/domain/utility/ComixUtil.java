@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -26,9 +27,11 @@ import java.util.regex.Pattern;
 @Component
 public class ComixUtil {
     // 4화, 4.5화, 4-5화, 4~6화
-    private static final String COMIX_NANE_PATTERN1 = "(^[0-9])([\\.\\-\\~][0-9])?[화권]+";
+    private static final String COMIX_NANE_PATTERN1 = "(^[0-9]{1,})([.\\-~][0-9]{1,})?[화권]+";
     // 4-1, 4, 4~7,
-    private static final String COMIX_NANE_PATTERN2 = "(^[0-9])([\\.\\-\\~][0-9])?\\,";
+    private static final String COMIX_NANE_PATTERN2 = "(^[0-9]{1,})([.\\-~][0-9]{1,})?,";
+    // 2부 73화
+    private static final String COMIX_NAME_PATTERN3 = "(^[0-9]{1,}부)";
 
     @Autowired
     ComixConfig comixConfig;
@@ -39,6 +42,7 @@ public class ComixUtil {
     /*
      * title 4화, title 4화 전편 title 4.5화, title 4-3, 4-4화, title 전편, title 후편, title 4-7화
      * title 11~13화, title 20, 21화
+     * title 2부 73화
      */
     public String getComixName(String title) {
         List<String> titles = Splitter.on(" ")
@@ -53,22 +57,13 @@ public class ComixUtil {
         String whiteSpace = "";
         for (int i = 0; i < titles.size(); i++) {
             word = titles.get(i);
-            if(Pattern.matches(COMIX_NANE_PATTERN1, word)) {
+            if (Pattern.matches(COMIX_NANE_PATTERN1, word)) {
                 break;
             }
 
-            if(Pattern.matches(COMIX_NANE_PATTERN2, word)) {
-                if(i != (titles.size() - 1)) {
-                    int idx = i;
-
-                    for(int j = idx; j < titles.size(); j++) {
-                        if(!Pattern.matches(COMIX_NANE_PATTERN2, titles.get(j))) {
-                            if(Pattern.matches(COMIX_NANE_PATTERN1, titles.get(j))
-                                    && (j == (titles.size() -1))) {
-                                break;
-                            }
-                        }
-                    }
+            if (Pattern.matches(COMIX_NANE_PATTERN2, word)) {
+                if(isEpisode(titles, i)) {
+                    break;
                 }
             }
 
@@ -77,6 +72,23 @@ public class ComixUtil {
         }
 
         return comixName;
+    }
+
+    private boolean isEpisode(List<String> titles, int idx) {
+        String word;
+        for(int i = idx; i < titles.size(); i++) {
+            word = titles.get(i);
+
+            if(Pattern.matches(COMIX_NANE_PATTERN1, word)) {
+                return true;
+            }
+
+            if(!Pattern.matches(COMIX_NANE_PATTERN2, word)) {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     public boolean isImageUrl(String uri) {
@@ -120,7 +132,7 @@ public class ComixUtil {
             }
         }
 
-        if(str == null) {
+        if (str == null) {
             return episode;
         }
 
