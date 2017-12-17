@@ -1,4 +1,4 @@
-package com.bleaf.comix.crawler.domain.marumaru;
+package com.bleaf.comix.crawler.domain.crawler.marumaru;
 
 
 import com.bleaf.comix.crawler.configuration.MarumaruConfig;

@@ -1,4 +1,4 @@
-package com.bleaf.comix.crawler.domain.json;
+package com.bleaf.comix.crawler.json;
 
 import lombok.Data;
 

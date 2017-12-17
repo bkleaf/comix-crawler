@@ -1,14 +1,12 @@
-package com.bleaf.comix.crawler.domain.marumaru;
+package com.bleaf.comix.crawler.domain.crawler.marumaru;
 
 import com.bleaf.comix.crawler.configuration.ComixConfig;
 import com.bleaf.comix.crawler.configuration.MarumaruConfig;
-import com.bleaf.comix.crawler.domain.ComixCrawler;
 import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.bleaf.comix.crawler.domain.utility.HtmlParserUtil;
 import com.bleaf.comix.crawler.domain.utility.StoreType;
 import com.google.common.collect.Lists;
-import com.google.common.net.UrlEscapers;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -46,7 +43,7 @@ public class DateCrawler {
 //        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
 
         List<Comix> comixes = Lists.newArrayList();
-        Path homePath = Paths.get(comixConfig.getBasePath(), today.toString("yyyyMMdd"));
+        Path homePath = Paths.get(comixConfig.getDownloadPath(), today.toString("yyyyMMdd"));
         Path servicePath = Paths.get(comixConfig.getServicePath(), today.toString("yyyyMMdd"));
 
         Comix comix;

@@ -91,7 +91,7 @@ public class HtmlParserUtil {
                     .userAgent(UserAgent.getUserAgent())
                     .header("charset", "utf-8")
                     .header("Accept-Encoding", "gzip") //20171126 gzip 추가
-                    .timeout(5000)
+                    .timeout(comixConfig.getTimeout())
                     .get();
 
         }
@@ -113,7 +113,7 @@ public class HtmlParserUtil {
                         .cookies(marumaruConfig.getCookies())
                         .data("pass", marumaruConfig.getPassword())
                         .data("Referer", listUri + "?type=pass")
-                        .timeout(30000)
+                        .timeout(comixConfig.getTimeout())
                         .method(Connection.Method.GET)
                         .execute();
 

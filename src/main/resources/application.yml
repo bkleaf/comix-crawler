@@ -11,7 +11,6 @@ bleaf:
 #        "PHPSESSID": "1b065af1946ded592b3d6f88ece9bdee"
 #        "PHPSESSID": "1b065af1946ded592b3d6f88ece9bdee"
         "PHPSESSID": "ujnuhjbubk517htsqgq7mfs663"
-        "__cfduid": "d133aab1e2d97eeb45b68a78da796636a1513405625"
     crawler:
       image_file_domains:
         - "wasabisyrup"
@@ -44,6 +43,7 @@ bleaf:
     crawler:
       base_path: "D:\\Comix\\daily"
       service_path: "D:\\Comix\\root"
+      timeout: 5000
 
 ---
 
@@ -55,6 +55,7 @@ bleaf:
     crawler:
       base_path: "/Users/bleaf/Documents/comix"
       service_path: "/Users/bleaf/Documents/comix/service"
+      timeout: 5000
 
 ---
 
@@ -66,3 +67,4 @@ bleaf:
     crawler:
       base_path: "/bleaf/comix/download"
       service_path: "/bleaf/comix/service"
+      timeout: 30000

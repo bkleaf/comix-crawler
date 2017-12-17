@@ -20,34 +20,59 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Component
 public class ComixUtil {
+    // 4화, 4.5화, 4-5화, 4~6화
+    private static final String COMIX_NANE_PATTERN1 = "(^[0-9])([\\.\\-\\~][0-9])?[화권]+";
+    // 4-1, 4, 4~7,
+    private static final String COMIX_NANE_PATTERN2 = "(^[0-9])([\\.\\-\\~][0-9])?\\,";
+
     @Autowired
     ComixConfig comixConfig;
 
     @Autowired
     MarumaruConfig marumaruConfig;
 
+    /*
+     * title 4화, title 4화 전편 title 4.5화, title 4-3, 4-4화, title 전편, title 후편, title 4-7화
+     * title 11~13화, title 20, 21화
+     */
     public String getComixName(String title) {
         List<String> titles = Splitter.on(" ")
                 .omitEmptyStrings()
                 .trimResults()
                 .splitToList(title);
 
-        String str;
+        String word;
         int lastIdx = 0;
 
         String comixName = "";
         String whiteSpace = "";
         for (int i = 0; i < titles.size(); i++) {
-            str = titles.get(i);
-            if (str.endsWith("화") || str.endsWith("권")) {
+            word = titles.get(i);
+            if(Pattern.matches(COMIX_NANE_PATTERN1, word)) {
                 break;
             }
 
-            comixName += whiteSpace + str;
+            if(Pattern.matches(COMIX_NANE_PATTERN2, word)) {
+                if(i != (titles.size() - 1)) {
+                    int idx = i;
+
+                    for(int j = idx; j < titles.size(); j++) {
+                        if(!Pattern.matches(COMIX_NANE_PATTERN2, titles.get(j))) {
+                            if(Pattern.matches(COMIX_NANE_PATTERN1, titles.get(j))
+                                    && (j == (titles.size() -1))) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            comixName += whiteSpace + word;
             whiteSpace = " ";
         }
 
@@ -107,7 +132,7 @@ public class ComixUtil {
     }
 
     public boolean makeDownloadDirectory(String directoryName) throws IOException {
-        Path basePath = Paths.get(comixConfig.getBasePath());
+        Path basePath = Paths.get(comixConfig.getDownloadPath());
         Path servicePath = Paths.get(comixConfig.getServicePath());
 
         if (!Files.exists(basePath))

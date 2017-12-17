@@ -10,7 +10,8 @@ import java.util.List;
 @Configuration
 @ConfigurationProperties("bleaf.comix.crawler")
 public class ComixConfig {
-    String basePath;
+    String downloadPath;
     String servicePath;
     List<String> imageFileDomains;
+    int timeout;
 }

@@ -1,13 +1,11 @@
-package com.bleaf.comix.crawler.domain.marumaru;
+package com.bleaf.comix.crawler.domain.crawler.marumaru;
 
 import com.bleaf.comix.crawler.configuration.ComixConfig;
 import com.bleaf.comix.crawler.configuration.MarumaruConfig;
-import com.bleaf.comix.crawler.domain.ComixCrawler;
 import com.bleaf.comix.crawler.domain.dto.Comix;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.bleaf.comix.crawler.domain.utility.HtmlParserUtil;
 import com.bleaf.comix.crawler.domain.utility.StoreType;
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -15,19 +13,14 @@ import com.google.common.collect.Maps;
 import com.google.common.net.UrlEscapers;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +45,7 @@ public class TitleCrawler {
 
         // base path / {comixName} / {comixName} + 화
         // 구조를 가져야 해서 home 및 service는 기본 paht에 코믹스 네임 밑으로 생성 시킨다
-        Path homePath = Paths.get(comixConfig.getBasePath(), comixUtil.checkTitle(comixName));
+        Path homePath = Paths.get(comixConfig.getDownloadPath(), comixUtil.checkTitle(comixName));
         Path servicePath = Paths.get(comixConfig.getServicePath(), comixUtil.checkTitle(comixName));
 
         Comix comix;

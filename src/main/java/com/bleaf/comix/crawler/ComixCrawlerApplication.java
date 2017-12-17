@@ -3,7 +3,7 @@ package com.bleaf.comix.crawler;
 import com.bleaf.comix.crawler.configuration.MarumaruConfig;
 import com.bleaf.comix.crawler.domain.application.Compressor;
 import com.bleaf.comix.crawler.domain.application.Downloader;
-import com.bleaf.comix.crawler.domain.marumaru.DateCrawler;
+import com.bleaf.comix.crawler.domain.crawler.marumaru.DateCrawler;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.bleaf.comix.crawler.domain.utility.HtmlParserUtil;
 import com.bleaf.comix.crawler.service.ComixCrawlerService;
@@ -14,10 +14,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.util.regex.Pattern;
+
 @Slf4j
 @EnableScheduling
 @SpringBootApplication
-public class ComixCrawlerApplication {// implements CommandLineRunner {
+public class ComixCrawlerApplication implements CommandLineRunner {
 
     @Autowired
     ComixCrawlerService comixCrawlerService;
@@ -44,18 +46,50 @@ public class ComixCrawlerApplication {// implements CommandLineRunner {
         SpringApplication.run(ComixCrawlerApplication.class, args);
     }
 
-//	@Override
-//	public void run(String... strings) throws Exception {
-////		DateTime dateTime = DateTimeFormat
-////				.forPattern("yyyyMMdd")
-////				.parseDateTime("20171209");
-////		List<Comix> list = dailyCrawler.getDailyList(dateTime);
-////
-////		downloader.download(list);
-////		compressor.zip(list, dateTime);
-////
-////		log.info("ist = {}", list.size());
+	@Override
+	public void run(String... strings) throws Exception {
+//		DateTime dateTime = DateTimeFormat
+//				.forPattern("yyyyMMdd")
+//				.parseDateTime("20171209");
+//		List<Comix> list = dailyCrawler.getDailyList(dateTime);
 //
+//		downloader.download(list);
+//		compressor.zip(list, dateTime);
+//
+//		log.info("ist = {}", list.size());
+
 //		comixCrawlerService.crawlingByName("오크가 범해주질 않아!", "1,3-5");
-//	}
+
+//        String[] titles = {"성녀의 마력은 만능입니다 4-3, 4-4화", "이종족 리뷰어즈 01~13화", "ccc 2.5화", };
+//
+//        for(String t : titles) {
+//            String episode = comixUtil.getEpisode(t);
+//            String cn = comixUtil.getComixName(t);
+//            log.info("episode = {} : {}", cn, episode);
+//        }
+
+        /*
+         * title 4화, title 4화 전편 title 4.5화, title 4-3, 4-4화, title 전편, title 후편, title 4-7화
+         * title 11~13화, title 20, 21화
+         */
+
+
+
+        // 4화
+        Pattern pattern1 = Pattern.compile("(^[0-9])([\\.\\-\\~][0-9])?[화권]+");
+
+        // 4-1, 4-2, 4-3, 4-4화
+
+        Pattern pattern2 = Pattern.compile("(^[0-9])([\\.\\-\\~][0-9])?\\,");
+
+        String title = "4~5화";
+
+        if(Pattern.matches("(^[0-9])([\\.\\-\\~][0-9])?[화권]+", title)) {
+            log.info("aaaaa = {}", title);
+        } else if(pattern2.matcher(title).find()){
+            log.info("bbbb = {}", title);
+        } else {
+            log.info("fail = {}", title);
+        }
+	}
 }

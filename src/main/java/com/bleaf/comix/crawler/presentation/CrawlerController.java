@@ -1,6 +1,6 @@
 package com.bleaf.comix.crawler.presentation;
 
-import com.bleaf.comix.crawler.domain.json.DownloadResult;
+import com.bleaf.comix.crawler.json.DownloadResult;
 import com.bleaf.comix.crawler.service.ComixCrawlerService;
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;

@@ -1,14 +1,12 @@
 package com.bleaf.comix.crawler.service;
 
-import com.bleaf.comix.crawler.configuration.ComixConfig;
-import com.bleaf.comix.crawler.configuration.MarumaruConfig;
 import com.bleaf.comix.crawler.domain.application.Compressor;
 import com.bleaf.comix.crawler.domain.application.Downloader;
 import com.bleaf.comix.crawler.domain.dto.Comix;
-import com.bleaf.comix.crawler.domain.json.DownloadResult;
-import com.bleaf.comix.crawler.domain.marumaru.DateCrawler;
-import com.bleaf.comix.crawler.domain.marumaru.MarumaruService;
-import com.bleaf.comix.crawler.domain.marumaru.TitleCrawler;
+import com.bleaf.comix.crawler.json.DownloadResult;
+import com.bleaf.comix.crawler.domain.crawler.marumaru.DateCrawler;
+import com.bleaf.comix.crawler.domain.crawler.marumaru.MarumaruService;
+import com.bleaf.comix.crawler.domain.crawler.marumaru.TitleCrawler;
 import com.bleaf.comix.crawler.domain.utility.ComixUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
