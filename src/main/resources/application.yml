@@ -28,7 +28,7 @@ spring:
       hibernate:
         format_sql: true
   profiles:
-    active: win
+    active: mac
 
 server:
   port: 52272
@@ -41,7 +41,7 @@ spring:
 bleaf:
   comix:
     crawler:
-      base_path: "D:\\Comix\\daily"
+      download_path: "D:\\Comix\\daily"
       service_path: "D:\\Comix\\root"
       timeout: 5000
 
@@ -53,7 +53,7 @@ spring:
 bleaf:
   comix:
     crawler:
-      base_path: "/Users/bleaf/Documents/comix"
+      download_path: "/Users/bleaf/Documents/comix"
       service_path: "/Users/bleaf/Documents/comix/service"
       timeout: 5000
 
@@ -65,6 +65,6 @@ spring:
 bleaf:
   comix:
     crawler:
-      base_path: "/bleaf/comix/download"
+      download_path: "/bleaf/comix/download"
       service_path: "/bleaf/comix/service"
       timeout: 30000

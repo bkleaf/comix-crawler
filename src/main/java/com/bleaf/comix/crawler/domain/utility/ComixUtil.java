@@ -27,11 +27,8 @@ import java.util.regex.Pattern;
 @Component
 public class ComixUtil {
     // 4화, 4.5화, 4-5화, 4~6화
-    private static final String COMIX_NANE_PATTERN1 = "(^[0-9]{1,})([.\\-~][0-9]{1,})?[화권]+";
-    // 4-1, 4, 4~7,
-    private static final String COMIX_NANE_PATTERN2 = "(^[0-9]{1,})([.\\-~][0-9]{1,})?,";
-    // 2부 73화
-    private static final String COMIX_NAME_PATTERN3 = "(^[0-9]{1,}부)";
+    private static final String COMIX_EPISODE_PATTERN1 = "^\\d+([\\-.~]\\d+)*[화권]$";
+    private static final String COMIX_EPISODE_PATTERN2 = "^\\d+([\\-.~]\\d+)*[,부]$";
 
     @Autowired
     ComixConfig comixConfig;
@@ -57,12 +54,16 @@ public class ComixUtil {
         String whiteSpace = "";
         for (int i = 0; i < titles.size(); i++) {
             word = titles.get(i);
-            if (Pattern.matches(COMIX_NANE_PATTERN1, word)) {
+
+            if(Pattern.matches(COMIX_EPISODE_PATTERN1, word)) {
                 break;
             }
 
-            if (Pattern.matches(COMIX_NANE_PATTERN2, word)) {
-                if(isEpisode(titles, i)) {
+            if(Pattern.matches(COMIX_EPISODE_PATTERN2, word)) {
+                if(i < (titles.size() - 1)
+                        && (Pattern.matches(COMIX_EPISODE_PATTERN1, titles.get(i+1))
+                        || Pattern.matches(COMIX_EPISODE_PATTERN2, titles.get(i+1)))) {
+
                     break;
                 }
             }
@@ -72,23 +73,6 @@ public class ComixUtil {
         }
 
         return comixName;
-    }
-
-    private boolean isEpisode(List<String> titles, int idx) {
-        String word;
-        for(int i = idx; i < titles.size(); i++) {
-            word = titles.get(i);
-
-            if(Pattern.matches(COMIX_NANE_PATTERN1, word)) {
-                return true;
-            }
-
-            if(!Pattern.matches(COMIX_NANE_PATTERN2, word)) {
-                return false;
-            }
-        }
-
-        return false;
     }
 
     public boolean isImageUrl(String uri) {
@@ -115,30 +99,34 @@ public class ComixUtil {
     }
 
     public String getEpisode(String title) {
-        String episode = null;
-
         List<String> titles = Splitter.on(" ")
                 .omitEmptyStrings()
                 .trimResults()
                 .splitToList(title);
 
-        String str = null;
-        int lastIdx = 0;
+        String word, episode = "";
 
+        int lastIdx = 0;
+        String whiteSpace = "";
         for (int i = 0; i < titles.size(); i++) {
-            str = titles.get(i);
-            if (str.endsWith("화") || str.endsWith("권")) {
-                break;
+            word = titles.get(i);
+            if(Pattern.matches(COMIX_EPISODE_PATTERN2, word)) {
+                if(i < (titles.size() - 1)
+                        && (Pattern.matches(COMIX_EPISODE_PATTERN1, titles.get(i+1))
+                        || Pattern.matches(COMIX_EPISODE_PATTERN2, titles.get(i+1)))) {
+
+                    episode += whiteSpace + word;
+                    whiteSpace = " ";
+                }
+            }
+
+            if(Pattern.matches(COMIX_EPISODE_PATTERN1, word)) {
+                episode += whiteSpace + word;
+                whiteSpace = " ";
             }
         }
 
-        if (str == null) {
-            return episode;
-        }
-
-        episode = str.replaceAll("[a-z|A-Z|ㄱ-ㅎ|가-힣]", "");
-
-        log.debug("last char = {} : convert page = {}", str, episode);
+        log.debug("title = {} : convert page = {}", title, episode);
 
         return episode;
     }
@@ -246,7 +234,7 @@ public class ComixUtil {
 
     public String checkTitle(String title) {
         title = title.replaceAll("[\\/:*?<>|.]", " ").trim();
-        title = title.replaceAll("^\\[[ㄱ-ㅎ|가-힣]\\]+", "").trim();
+        title = title.replaceAll("^\\[[ㄱ-ㅎ가-힣]+\\]", "").trim();
 
         return title;
     }

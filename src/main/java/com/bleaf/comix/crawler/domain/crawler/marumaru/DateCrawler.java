@@ -48,8 +48,8 @@ public class DateCrawler {
 
         Comix comix;
 
-        String name, title, date, href, episodeUri, allEpisodeUri, episode;
-        List<String> comixPage;
+        String name, title, date, href, allEpisodeUri, comixName, episode;
+        List<String> comixPage, episodeUri;
 
         DateTime dateTime = null;
 
@@ -91,38 +91,41 @@ public class DateCrawler {
                         .forPattern(marumaruConfig.getDateFormat())
                         .parseDateTime(date);
 
-                episode = comixUtil.getEpisode(title);
-
                 if (!today.equals(dateTime)) {
                     continue;
                 }
 
+                comixName = comixUtil.getComixName(title);
+
                 try {
-                    episodeUri = getEpisodeUri(href);
+                    episodeUri = getEpisodeUri(comixName, href);
                     allEpisodeUri = getAllEpisodeUri(href);
 
-                    comixPage = htmlParserUtil.getComixImageUri(episodeUri, StoreType.MARUMARU);
+                    for(String uri : episodeUri) {
 
-                    comix = new Comix();
-                    comix.setName(comixUtil.getComixName(title));
-                    comix.setTitle(title);
-                    comix.setUpdateDate(dateTime);
-                    comix.setShortComix(comixUtil.isShort(title));
-                    comix.setExts(comixUtil.getImageExtension(comixPage));
+                        comixPage = htmlParserUtil.getComixImageUri(uri, StoreType.MARUMARU);
 
-                    comix.setComixUri(href);
-                    comix.setEpisodeUri(episodeUri);
-                    comix.setAllEpisodeUri(allEpisodeUri);
-                    comix.setImageUris(comixPage);
+                        comix = new Comix();
+                        comix.setName(comixName);
+                        comix.setTitle(title);
+                        comix.setUpdateDate(dateTime);
+                        comix.setShortComix(comixUtil.isShort(title));
+                        comix.setExts(comixUtil.getImageExtension(comixPage));
 
-                    comix.setDownloadPath(homePath.resolve(title));
-                    comix.setServicePath(servicePath.resolve(title));
+                        comix.setComixUri(href);
+                        comix.setEpisodeUri(uri);
+                        comix.setAllEpisodeUri(allEpisodeUri);
+                        comix.setImageUris(comixPage);
 
-                    comix.setEpisode(comixUtil.getEpisode(title));
+                        comix.setDownloadPath(homePath.resolve(title));
+                        comix.setServicePath(servicePath.resolve(title));
 
-                    log.info(" ### comix info = {}", comix);
+                        comix.setEpisode(comixUtil.getEpisode(title));
 
-                    comixes.add(comix);
+                        log.info(" ### comix info = {}", comix);
+
+                        comixes.add(comix);
+                    }
                 } catch (IOException e) {
                     log.error(" ### fail crawling uri = {}", e.getMessage());
                 }
@@ -141,35 +144,60 @@ public class DateCrawler {
     }
 
     // 업데이트 된 화에 해당하는 uri를 돌려 준다
-    private String getEpisodeUri(String uri) throws IOException {
+    private List<String> getEpisodeUri(String comixName, String uri) throws IOException {
         Document rawData = htmlParserUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
 
 //        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
 
-        Elements contentATags = rawData.select("#vContent a"); // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
+        Elements contentATags = rawData.select("#vContent div.ctt_box a"); // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
 
-        String viewPageUrl = contentATags.first()
-                .attr("abs:href"); // 마찬가지로 절대주소 href를 얻어낸다
+        List<String> uris = Lists.newArrayList();
 
-        log.info("comix info url = {}", viewPageUrl);
+        String title;
+        for(Element contents : contentATags) {
+            title = contents.ownText();
+
+            if(title == null) {
+                title = contents.getElementsByTag("font").text();
+            }
+
+            if(comixName.equals(
+                    comixUtil.getComixName(
+                            comixUtil.checkTitle(title)))) {
+
+                uris.add(contents.attr("abs:href"));
+            }
+        }
+
+        log.info("comix info url = {}", uris);
 
 
-        return viewPageUrl;
+        return uris;
     }
 
     // 전체 화가 있는 page url을 돌려 준다.
     private String getAllEpisodeUri(String uri) throws IOException {
         Document rawData = htmlParserUtil.getHtmlPageJsoup(uri, StoreType.MARUMARU);
 
-        Elements contentATags = rawData.select("#vContent a"); // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
+//        Document rawData = Jsoup.parse(pageSource, marumaruConfig.getBaseUri());
 
-        String viewPageUrl = contentATags.get(1)
-                .attr("abs:href"); // 마찬가지로 절대주소 href를 얻어낸다
+        Elements contentATags = rawData.select("#vContent div.ctt_box a"); // 공지사항을 제외한 tr의 a 태그들을 얻어온다.
 
-        log.info("comix info url = {}", viewPageUrl);
+        String allUri = null;
+
+        String subject;
+        for(Element contents : contentATags) {
+            subject = contents.ownText();
+
+            if(subject.equals("전편 보러가기")) {
+                allUri = contents.attr("abs:href");
+            }
+        }
+
+        log.info("comix all episode info url = {}", allUri);
 
 
-        return viewPageUrl;
+        return allUri;
     }
 
     public String getUpdateUri(int pageNum, Document rawData) {
