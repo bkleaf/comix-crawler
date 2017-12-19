@@ -55,7 +55,7 @@ public class ComixCrawlerApplication implements CommandLineRunner {
 				.forPattern("yyyyMMdd")
 				.parseDateTime("20171209");
 
-		comixCrawlerService.crawlingByDate("20171217");
+		comixCrawlerService.crawlingByDate("20171218");
 //
 //		downloader.download(list);
 //		compressor.zip(list, dateTime);

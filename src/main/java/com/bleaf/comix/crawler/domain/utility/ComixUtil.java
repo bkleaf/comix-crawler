@@ -233,6 +233,8 @@ public class ComixUtil {
     }
 
     public String checkTitle(String title) {
+        if(Strings.isNullOrEmpty(title)) return title;
+
         title = title.replaceAll("[\\/:*?<>|.]", " ").trim();
         title = title.replaceAll("^\\[[ㄱ-ㅎ가-힣]+\\]", "").trim();
 
