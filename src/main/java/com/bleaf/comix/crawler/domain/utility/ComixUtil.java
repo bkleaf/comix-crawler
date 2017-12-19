@@ -165,7 +165,7 @@ public class ComixUtil {
             Path comixPath = comix.getDownloadPath();
 
             if (Files.exists(comixPath)) {
-                log.info("해당 디렉토리가 존재 합니다");
+                log.info("해당 디렉토리가 존재 합니다 = {}", comixPath.toString());
                 FileSystemUtils.deleteRecursively(comixPath.toFile());
             }
 

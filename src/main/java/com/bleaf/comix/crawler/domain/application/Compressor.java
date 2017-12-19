@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,12 +39,17 @@ public class Compressor {
 
             comixPath = comix.getDownloadPath();
 
-            if (!Files.exists(comixPath)) continue;
+            if (!Files.exists(comixPath)) {
+                log.error("comix download path가 존재하지 않습니다 = {}", comixPath.toString());
+                continue;
+            }
 
             servicePath = comix.getServicePath();
             zipPath = Paths.get(servicePath.toString() + ".zip");
 
             comixPageFilter.setExts(comix.getExts());
+
+            log.info("comix 압축을 시작합니다 = {} => {}", comixPath.toString(), zipPath.toString());
 
             try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(zipPath.toFile());
                  DirectoryStream<Path> directoryStream = Files.newDirectoryStream(comixPath, comixPageFilter)) {
@@ -63,11 +67,12 @@ public class Compressor {
                 zipArchiveOutputStream.finish();
                 zipArchiveOutputStream.flush();
 
-                log.debug(" ### compress zip = {}", zipPath.toString());
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            log.info(" ### 압축이 완료 되었습니다  = {}", zipPath.toString());
 
             count += 1;
         }

@@ -51,9 +51,9 @@ public class HtmlParserUtil {
                 return this.getImageUriFromWasabi(uri, storeType);
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            log.error("정상적인 uri format이 아닙니다 = {}", uri);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("comic image page load 시 에러가 발생했습니다 = {}", e.getMessage());
         }
 
         return null;
@@ -67,6 +67,10 @@ public class HtmlParserUtil {
             if(storeType == StoreType.MARUMARU) {
                 rawData = this.getMarumaruRobotPage(uri);
             }
+        }
+
+        if(rawData == null) {
+            return null;
         }
 
         // lz-lazyload 클래스를 가진 img들

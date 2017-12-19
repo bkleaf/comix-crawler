@@ -99,11 +99,16 @@ public class DateCrawler {
 
                 try {
                     comixList = getEpisodeUri(comixName, href);
-                    allEpisodeUri = getAllEpisodeUri(href);
+                    //date crawler 시 에는 필요가 없슴
+//                    allEpisodeUri = getAllEpisodeUri(href);
 
                     for(Comix comix : comixList) {
 
                         comixPage = htmlParserUtil.getComixImageUri(comix.getEpisodeUri(), StoreType.MARUMARU);
+
+                        if(comixPage == null) {
+                            comix.setFail(true);
+                        }
 
                         comix.setName(comixName);
                         comix.setUpdateDate(dateTime);
@@ -111,7 +116,7 @@ public class DateCrawler {
                         comix.setExts(comixUtil.getImageExtension(comixPage));
 
                         comix.setComixUri(href);
-                        comix.setAllEpisodeUri(allEpisodeUri);
+//                        comix.setAllEpisodeUri(allEpisodeUri);
                         comix.setImageUris(comixPage);
 
                         comix.setDownloadPath(downloadPath.resolve(comix.getTitle()));
@@ -195,7 +200,7 @@ public class DateCrawler {
             }
         }
 
-        log.info("comix all episode info url = {}", allUri);
+        log.debug("comix all episode info url = {}", allUri);
 
 
         return allUri;

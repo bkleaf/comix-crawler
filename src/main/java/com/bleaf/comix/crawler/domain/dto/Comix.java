@@ -29,9 +29,6 @@ public class Comix {
     boolean shortComix;
     String episode;
 
-    // 몇화 표시 뒤에 나오는 문자
-    // ex) 전편, 후편, 외전
-    String suffix;
     List<String> exts;
 
 //    Path homePath;
@@ -46,4 +43,6 @@ public class Comix {
     String episodeUri;
     // 만화 img uri
     List<String> imageUris;
+
+    boolean fail;
 }

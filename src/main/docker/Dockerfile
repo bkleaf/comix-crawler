@@ -32,15 +32,12 @@ RUN apt-get install -y git
 
 RUN mkdir -p /bleaf/src
 
-RUN cd /bleaf/src
-RUN git clone https://github.com/bkleaf/comix-crawler.git
-
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
-#ADD comix-crawler-0.0.1-SNAPSHOT.jar /bleaf/src/comix-crawler.jar
+ADD comix-crawler-0.0.1-SNAPSHOT.jar /bleaf/src/comix-crawler.jar
 
 VOLUME ["/bleaf/comix/download","/bleaf/comix/service"]
 
-#ENTRYPOINT ["java","-Dspring.profiles.active=product", "-Djava.security.egd=file:/dev/./urandom","-jar","/bleaf/src/comix-crawler.jar"]
+ENTRYPOINT ["java","-Dspring.profiles.active=product", "-Djava.security.egd=file:/dev/./urandom","-jar","/bleaf/src/comix-crawler.jar"]
 
 EXPOSE 52272
