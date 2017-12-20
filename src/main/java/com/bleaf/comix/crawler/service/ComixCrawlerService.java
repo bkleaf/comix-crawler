@@ -44,7 +44,8 @@ public class ComixCrawlerService {
 
     @Scheduled(cron = "0 0 2 *  * ?")
     public DownloadResult crawlingByDate() {
-        String date = new DateTime().toString("yyyyMMdd");
+        // 새벽 2시에 전날의 만화를 수집한다
+        String date = new DateTime().minusDays(1).toString("yyyyMMdd");
         return this.crawlingByDate(date);
     }
 
@@ -133,6 +134,12 @@ public class ComixCrawlerService {
         log.info(" ### complete compress = {} : {}", comixList.size(), count);
 
         downloadResult.setCompressCount(count);
+
+        for(Comix comix : comixList) {
+            if(comix.isFail()) {
+                log.info(" marumaru download 실패 = {}", comix.getTitle());
+            }
+        }
 
         return downloadResult;
     }

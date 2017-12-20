@@ -51,17 +51,7 @@ public class ComixCrawlerApplication {//implements CommandLineRunner {
 
 //    @Override
 //    public void run(String... strings) throws Exception {
-//		DateTime dateTime = DateTimeFormat
-//				.forPattern("yyyyMMdd")
-//				.parseDateTime("20171209");
-//
-//		comixCrawlerService.crawlingByDate("20171218");
-////
-////		downloader.download(list);
-////		compressor.zip(list, dateTime);
-////
-////		log.info("ist = {}", list.size());
-//
-////		comixCrawlerService.crawlingByName("오크가 범해주질 않아!", "1,3-5");
+//        DateTime dt = new DateTime().minusDays(1);
+//        log.info(dt.toString());
 //    }
 }
