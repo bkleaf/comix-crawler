@@ -45,9 +45,11 @@ public class DateCrawler {
 
         List<Comix> comixes = Lists.newArrayList();
         Path downloadPath = Paths.get(comixConfig.getDownloadPath(), today.toString("yyyyMMdd"));
-        Path servicePath = Paths.get(comixConfig.getServicePath(), today.toString("yyyyMMdd"));
+        // 서비스 path를  /$root/$date/$title의 형식으로 정했으나, 보기 불편하여..
+        // /$root/$comix_name/$comix_title의 형식으로 변경.
+//        Path servicePath = Paths.get(comixConfig.getServicePath(), today.toString("yyyyMMdd"));
 
-        String name, title, date, href, allEpisodeUri, comixName, episode;
+        String title, date, href, comixName;
         List<String> comixPage;
         List<Comix> comixList;
 
@@ -57,6 +59,8 @@ public class DateCrawler {
 
         int pageNum = 1;
         String upateUri = marumaruConfig.getDailyUri();
+
+        Path servicePath;
 
         boolean stop = false;
         while(!stop) {
@@ -120,7 +124,10 @@ public class DateCrawler {
                         comix.setImageUris(comixPage);
 
                         comix.setDownloadPath(downloadPath.resolve(comix.getTitle()));
-                        comix.setServicePath(servicePath.resolve(comix.getTitle()));
+
+                        servicePath = Paths.get(comixConfig.getServicePath(), comixName);
+                        log.debug(" ### service path = {}", servicePath);
+                        comix.setServicePath(servicePath);
 
                         log.info(" ### comix info = {}", comix);
 

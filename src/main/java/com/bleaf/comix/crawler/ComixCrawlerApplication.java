@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 @EnableScheduling
 @SpringBootApplication
-public class ComixCrawlerApplication {//implements CommandLineRunner {
+public class ComixCrawlerApplication implements CommandLineRunner {
 
     @Autowired
     ComixCrawlerService comixCrawlerService;
@@ -49,9 +49,9 @@ public class ComixCrawlerApplication {//implements CommandLineRunner {
         SpringApplication.run(ComixCrawlerApplication.class, args);
     }
 
-//    @Override
-//    public void run(String... strings) throws Exception {
-//        DateTime dt = new DateTime().minusDays(1);
-//        log.info(dt.toString());
-//    }
+    @Override
+    public void run(String... strings) throws Exception {
+        comixCrawlerService.crawlingByName("하이스코어 걸");
+//        comixCrawlerService.crawlingByDate("20180103");
+    }
 }

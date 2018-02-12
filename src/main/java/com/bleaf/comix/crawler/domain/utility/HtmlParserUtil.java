@@ -91,10 +91,16 @@ public class HtmlParserUtil {
     public Document getHtmlPageJsoup(String listUrl, StoreType storeType){
         Document preDoc = null;
         try {
+            String agent = UserAgent.getUserAgent();
+
+            log.info("agent = {}", agent);
+
             preDoc = Jsoup.connect(listUrl)
-                    .userAgent(UserAgent.getUserAgent())
+                    .userAgent(agent)
                     .header("charset", "utf-8")
                     .header("Accept-Encoding", "gzip") //20171126 gzip 추가
+                    .data("pass", marumaruConfig.getPassword())
+                    .cookie("marumaru-banner", "true")
                     .timeout(comixConfig.getTimeout())
                     .get();
 

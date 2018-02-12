@@ -45,7 +45,23 @@ public class Compressor {
             }
 
             servicePath = comix.getServicePath();
-            zipPath = Paths.get(servicePath.toString() + ".zip");
+            if(!Files.exists(servicePath)) {
+                try {
+                    Files.createDirectories(servicePath);
+                } catch (IOException e) {
+                    log.error(" ~~~ error make service directory = {}", servicePath);
+                    continue;
+                }
+
+                if(!Files.exists(servicePath)) {
+                    log.error(" ~~~ service directory가 생성되지 않았습니다. = {}", servicePath);
+                    continue;
+                }
+            }
+
+            zipPath = Paths.get(servicePath.toString(), comix.getTitle() + ".zip");
+
+            log.debug(" ### service zip path = {}", zipPath.toString());
 
             comixPageFilter.setExts(comix.getExts());
 
